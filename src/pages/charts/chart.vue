@@ -162,7 +162,7 @@
                 </div>
                 <div id="SizerB">
                     <el-date-picker
-                        v-model="timeSlotB"
+                        v-model="AB.timeSlotB"
                         type="datetimerange"
                         format="yyyy 年 MM 月 dd 日"
                         value-format="yyyy-MM-dd"

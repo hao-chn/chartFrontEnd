@@ -1,3 +1,4 @@
+
 <template>
     <div id="chart_ART">
         <el-card class="box-card" id="chart" style="margin-top: 60px;margin-bottom: 30px">
@@ -63,6 +64,10 @@
             <!--chart-->
             <div id="myChart" :style="{width:'100%',height:'600px'}"></div>
         </el-card>
+
+        <el-card class="box-card" style="margin-bottom: 30px">
+            <div id="main" :style="{width:'100%',height:'600px'}"></div>
+        </el-card>
     </div>
 </template>
 
@@ -86,6 +91,88 @@
                 backgroundColor3: 0,
                 channelId: ["0"],
                 channelIds: [],
+                dpdOption : {
+                    title : {
+                        text: '全国逾期率(dpd>=10)统计',
+                        subtext: '易借款2017年11月-2018年5月'
+                    },
+                    tooltip : {
+                        trigger: 'item'
+                    },
+                    legend: {
+                        x:'right',
+                        selectedMode:true,
+                        data:[]
+                    },
+                    dataRange: {
+                        orient: 'horizontal',
+                        min: 0.2,
+                        max:0.5,
+                        formatter:x=>Math.round(x*10000)/100+'%',
+                        text:['高','低'],           // 文本，默认为数值文本
+                        splitNumber:0
+                    },
+                    toolbox: {
+                        show : true,
+                        orient: 'vertical',
+                        x:'right',
+                        y:'center',
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false}
+                        }
+                    },
+                    series : [
+                        {
+                            name: '全国逾期率(dpd>=10)统计',
+                            type: 'map',
+                            mapType: 'china',
+                            mapLocation: {
+                                x: 'center'
+                            },
+                            selectedMode : 'multiple',
+                            itemStyle:{
+                                normal:{label:{show:true}},
+                                emphasis:{label:{show:true}}
+                            },
+                            data:[
+                                {name:'西藏', value:.4},
+                                {name:'青海', value:.3636},
+                                {name:'宁夏', value:.3103},
+                                {name:'海南', value:.4},
+                                {name:'甘肃', value:.4478},
+                                {name:'贵州', value:.4255},
+                                {name:'新疆', value:.3611},
+                                {name:'云南', value:.4423},
+                                {name:'重庆', value:.3741},
+                                {name:'吉林', value:.4234},
+                                {name:'山西', value:.37},
+                                {name:'天津', value:.2716},
+                                {name:'江西', value:.4095},
+                                {name:'广西', value:.3942},
+                                {name:'陕西', value:.3544},
+                                {name:'黑龙江', value:.3898},
+                                {name:'内蒙古', value:.4588},
+                                {name:'安徽', value:.2766},
+                                {name:'北京', value:.2945},
+                                {name:'福建', value:.4552},
+                                {name:'上海', value:.2464},
+                                {name:'湖北', value:.3491},
+                                {name:'湖南', value:.3470},
+                                {name:'四川', value:.381},
+                                {name:'辽宁', value:.371},
+                                {name:'河北', value:.3724},
+                                {name:'河南', value:.3058},
+                                {name:'浙江', value:.2912},
+                                {name:'山东', value:.3397},
+                                {name:'江苏', value:.2965},
+                                {name:'广东', value:.3757}
+                            ]
+                        },
+                        
+                    ],
+                    animation: false
+                }
             }
         },
 
@@ -97,6 +184,11 @@
                 this.channelIds = res.data[0].channelId;
             });
             this.getData();
+
+
+            var dpdchart = this.$echarts.init(document.getElementById('main'));
+            dpdchart.setOption(this.dpdOption,true);
+
         },
 
         methods: {

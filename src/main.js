@@ -12,6 +12,7 @@ import vuex from 'vuex'
 require('echarts/theme/macarons');
 require('echarts/theme/infographic');
 require('echarts/theme/shine');
+require('echarts/map/js/china');
 
 
 import 'element-ui/lib/theme-chalk/index.css'
