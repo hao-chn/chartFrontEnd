@@ -65,9 +65,55 @@
             <div id="myChart" :style="{width:'100%',height:'600px'}"></div>
         </el-card>
 
+        <el-card class="box-card" style="margin-bottom: 30px;text-align: center">
+            <div class="block">
+                <h3><b>渠道进件变动情况</b></h3>
+
+                    <el-date-picker
+                        v-model="decTime.timeSlotA"
+                        type="datetimerange"
+                        format="yyyy 年 MM 月 dd 日"
+                        value-format="yyyy-MM-dd"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        @change="getChannel"
+                        align="center"
+                        style="margin:1em">
+                    </el-date-picker>
+
+            </div>
+            <div id="channelFlow" :style="{width:'100%',height:'600px'}">
+            </div>
+        </el-card>
+
+        <!--channelTable-->
+        <el-card class="box-card" id="channelT" style="text-align: left;margin-bottom: 20px;text-align: center;">
+            <el-row>
+                <el-col :span="24">
+                    <div>
+                        <h3><b>渠道进件表格</b></h3>
+                    </div>
+                    <div style="margin: 0px auto 30px">
+                        <el-table :data="tableData" stripe header-align="center" border height="500"
+                            style="min-width: 0px;margin-top: 1em;overflow-y: auto;overflow-x:
+                            hidden;float:
+                        right;text-align:center">
+                            <el-table-column v-for="item in subTitle" :key="item" :prop="item" :label="item"
+                                header-align="center" sortable>
+                                {{item}}
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </el-col>
+            </el-row>
+        </el-card>
+
         <el-card class="box-card" style="margin-bottom: 30px">
             <div id="main" :style="{width:'100%',height:'600px'}"></div>
         </el-card>
+
+
     </div>
 </template>
 
@@ -79,7 +125,7 @@
         data() {
             return {
                 thisDay: new Date(),
-                weeksNb: 12,
+                weeksNb: 7,
                 sectionIpt: true,
                 oldNew: ["All", "isNew", "isOld"],
                 isNew: "All",
@@ -91,6 +137,10 @@
                 backgroundColor3: 0,
                 channelId: ["0"],
                 channelIds: [],
+                decTime: {
+                    timeSlotA:[new Date("2018-05-27"), new Date("2018-05-29")],
+                    timeSlotB:[new Date("2018-05-27"), new Date("2018-05-29")]
+                },
                 dpdOption : {
                     title : {
                         text: '全国逾期率(dpd>=10)统计',
@@ -172,6 +222,46 @@
                         
                     ],
                     animation: false
+                },
+                tableData: [],
+                subTitle: [],
+                channelOption:{
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    legend: {
+                        data:["oppo自然量","应用宝","分享链接","其他","其他推广渠道","vivo","应用分发","钱包尾量","信息流","搜索推广"]
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : ["2018-07-01", "2018-07-02", "2018-07-03", "2018-07-04", "2018-07-05", "2018-07-06", "2018-07-07", "2018-07-08", "2018-07-09", "2018-07-10", "2018-07-11", "2018-07-12", "2018-07-13", "2018-07-14", "2018-07-15", "2018-07-16", "2018-07-17", "2018-07-18", "2018-07-19", "2018-07-20", "2018-07-21", "2018-07-22", "2018-07-23", "2018-07-24", "2018-07-25", "2018-07-26", "2018-07-27", "2018-07-28", "2018-07-29", "2018-07-30", "2018-07-31"]
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value'
+                        }
+                    ],
+                    series : [{"name":"oppo自然量","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[168,396,329,279,282,278,116,78,296,284,461,351,532,247,314,729,660,672,347,515,281,252,565,672,649,421,497,270,227,405,435]},{"name":"vivo","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[4,8,11,6,2,5,6,4,3,5,6,110,162,92,153,242,89,71,37,52,73,52,35,29,17,20,21,20,20,22,32]},{"name":"信息流","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[1,3,3,3,8,6,2,6,9,9,18,14,1,3,7,11,11,154,5,3,6,11,9,2,2,2,1,72,33]},{"name":"其他","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[17,23,35,15,13,14,15,16,8,14,27,234,284,98,141,204,96,68,47,63,60,44,48,46,38,28,21,31,29,21,31]},{"name":"其他推广渠道","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[10,15,27,28,40,89,21,7,79,94,111,73,73,44,77,46,63,69,231,13,2,6,15,22,29,11,54,22,17,124,87]},{"name":"分享链接","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[1,2,1,2,2,2,4,2,69,123,141,387,676,604,261,199,118,118,91,70,70,51,74,70,57,43,41,38,35]},{"name":"应用分发","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[13,34,16,22,29,29,9,6,33,27,65,204,70,38,30,48,41,45,106,19,9,12,22,29,33,14,20,27,18,117,352]},{"name":"应用宝","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[24,37,33,12,19,23,20,30,30,22,60,1053,1502,633,891,1131,528,305,254,273,324,223,179,142,123,104,102,86,67,86,91]},{"name":"搜索推广","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[4,4,1,1,3,1,2,1,2,4,73,54,1,1,1,1,1,22,1,1,13,28]},{"name":"钱包尾量","type":"line","stack":"总量","areaStyle":{"normal":{}},"data":[14,14,11,14,30,39,36,52,49,34,59,61,47,40,32,14,19,16,49,6,10,10,5,9,3,4,10,34,40,71,63]}]
                 }
             }
         },
@@ -185,10 +275,11 @@
             });
             this.getData();
 
+            this.channelchart = this.$echarts.init(document.getElementById('channelFlow'));
+            this.channelchart.setOption(this.channelOption,true);
 
-            var dpdchart = this.$echarts.init(document.getElementById('main'));
-            dpdchart.setOption(this.dpdOption,true);
-
+            this.dpdchart = this.$echarts.init(document.getElementById('main'));
+            this.dpdchart.setOption(this.dpdOption,true);
         },
 
         methods: {
@@ -209,6 +300,33 @@
                         ;
                 }
                 this.getData()
+            },
+            
+            //获取每日渠道数据
+            getChannel() {
+                this.$ajax.get('/channelData', {
+                    url: '/channelData',
+                    baseURL: process.env.API_BASEURL,
+                    params: {
+                        dateS: this.decTime.timeSlotA[0],
+                        dateF: this.decTime.timeSlotA[1],
+                        status:'apply'
+                    }
+                }).then((res) => {
+                    console.log(1212);
+                    this.channelOption.series=res.data.data;
+                    this.channelOption.xAxis=[
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : res.data.dates
+                        }
+                    ];
+                    this.channelOption.legend.data=res.data.legend;
+                    this.channelchart.setOption(this.channelOption,true);
+                    this.tableData=res.data.tableData;
+                    this.subTitle=Object.keys(res.data.tableData[0]);
+                })
             },
 
             //获取后台数据
