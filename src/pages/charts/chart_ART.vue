@@ -85,7 +85,9 @@
             </div>
             <div id="channelFlow" :style="{width:'100%',height:'600px',margin:'0 0 2em 0'}">
             </div>
-            <div id="channelRateFlow" :style="{width:'100%',height:'600px'}">
+            <div id="channelRateFlow" :style="{width:'100%',height:'600px',margin:'0 0 2em 0'}">
+            </div>
+            <div id="classFlow" :style="{width:'100%',height:'600px'}">
             </div>
         </el-card>
 
@@ -111,15 +113,16 @@
             </el-row>
         </el-card>
 
-        <el-card class="box-card" style="margin-bottom: 30px">
-            <div id="main" :style="{width:'100%',height:'600px'}"></div>
+        <el-card class="box-card" style="margin-bottom: 0px">
+            <div id="main" :style="{width:'100%',height:'600px',marginBottom:'30px'}"></div>
+            <div id="dotmap" :style="{width:'100%',height:'600px'}"></div>
         </el-card>
 
 
     </div>
 </template>
-
 <script>
+
     export default {
 
         name: "chart_ART",
@@ -225,6 +228,167 @@
                     ],
                     animation: false
                 },
+                dotdata:[{"name":"7","value":"180"},{"name":"9","value":"0"},{"name":"15","value":"0"},{"name":"29","value":"1"},{"name":"37","value":"180"},{"name":"41","value":"0"},{"name":"51","value":"180"},{"name":"53","value":"0"},{"name":"59","value":"180"},{"name":"62","value":"0"},{"name":"64","value":"180"},{"name":"66","value":"0"},{"name":"73","value":"0"},{"name":"74","value":"0"},{"name":"79","value":"4"},{"name":"80","value":"180"},{"name":"87","value":"4"}],
+                geoCoordMap : {'7':[121.437,31.2307],'9':[121.437,31.2308],'15':[121.437,31.2306],'29':[116.757,36.7693],'37':[108.86,34.2367],'41':[108.434,24.559],'51':[116.65,35.4163],'53':[120.011,30.6453],'59':[118.903,25.0091],'62':[99.2574,24.0215],'64':[114.439,22.8264],'66':[121.44,31.0771],'73':[99.2948,27.163],'74':[117.05,24.6183],'79':[113.704,34.991],'80':[111.439,27.6916],'87':[121.035,30.1225]},
+
+                dotmapOption:{
+                    title: {
+                            text: '逾期地域分布情况',
+                            left: 'center',
+                            backgroundColor:'rgba(255,255,255,0.84)',
+                            zlevel:4,
+                            textStyle: {
+                                color: '#001200'
+                            }
+                        },
+                        tooltip : {
+                            trigger: 'item'
+                        },
+                        bmap: {
+                            center: [104.114129, 37.550339],
+                            zoom: 5,
+                            roam: true,
+                            mapStyle: {
+                                styleJson: [
+                              {
+                                        "featureType": "land",
+                                        "elementType": "geometry",
+                                        "stylers": {
+                                                  "color": "#e7f7fc"
+                                        }
+                              },
+                              {
+                                        "featureType": "water",
+                                        "elementType": "all",
+                                        "stylers": {
+                                                  "color": "#96b5d6"
+                                        }
+                              },
+                              {
+                                        "featureType": "green",
+                                        "elementType": "all",
+                                        "stylers": {
+                                                  "color": "#b0d3dd"
+                                        }
+                              },
+                              {
+                                        "featureType": "highway",
+                                        "elementType": "geometry.fill",
+                                        "stylers": {
+                                                  "color": "#a6cfcf"
+                                        }
+                              },
+                              {
+                                        "featureType": "highway",
+                                        "elementType": "geometry.stroke",
+                                        "stylers": {
+                                                  "color": "#7dabb3"
+                                        }
+                              },
+                              {
+                                        "featureType": "arterial",
+                                        "elementType": "geometry.fill",
+                                        "stylers": {
+                                                  "color": "#e7f7fc"
+                                        }
+                              },
+                              {
+                                        "featureType": "arterial",
+                                        "elementType": "geometry.stroke",
+                                        "stylers": {
+                                                  "color": "#b0d5d4"
+                                        }
+                              },
+                              {
+                                        "featureType": "local",
+                                        "elementType": "labels.text.fill",
+                                        "stylers": {
+                                                  "color": "#7a959a"
+                                        }
+                              },
+                              {
+                                        "featureType": "land",
+                                        "elementType": "labels.text.stroke",
+                                        "stylers": {
+                                                  "color": "#d6e4e5"
+                                        }
+                              },
+                              {
+                                        "featureType": "arterial",
+                                        "elementType": "labels.text.fill",
+                                        "stylers": {
+                                                  "color": "#374a46"
+                                        }
+                              },
+                              {
+                                        "featureType": "highway",
+                                        "elementType": "labels.text.fill",
+                                        "stylers": {
+                                                  "color": "#374a46"
+                                        }
+                              },
+                              {
+                                        "featureType": "highway",
+                                        "elementType": "labels.text.stroke",
+                                        "stylers": {
+                                                  "color": "#e9eeedff"
+                                        }
+                              }
+                        ]
+                        }
+                    },
+                    series : [
+                        {
+                            name: '逾期天数',
+                            type: 'scatter',
+                            coordinateSystem: 'bmap',
+                            // data: this.convertData(this.dotdata),
+                            symbolSize: 5,
+                            label: {
+                                normal: {
+                                    formatter: '{b}',
+                                    position: 'right',
+                                    show: false
+                                },
+                                emphasis: {
+                                    show: true
+                                }
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: '#003dff'
+                                }
+                            }
+                        },
+                        {
+                            name: '逾期天数（大于30）',
+                            type: 'effectScatter',
+                            coordinateSystem: 'bmap',
+                            // data: this.convertData(this.dotdata.filter(x=>parseInt(x.value)>30)),
+                            symbolSize: 5,
+                            showEffectOn: 'emphasis',
+                            rippleEffect: {
+                                brushType: 'stroke'
+                            },
+                            hoverAnimation: true,
+                            label: {
+                                normal: {
+                                    formatter: '{b}',
+                                    position: 'right',
+                                    show: false
+                                }
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: '#ff0000',
+                                    shadowBlur: 10,
+                                    shadowColor: '#333'
+                                }
+                            },
+                            zlevel: 1
+                        }
+                    ]
+                },
                 tableData: [],
                 subTitle: [],
                 channelOption:{
@@ -311,6 +475,48 @@
                         
                     },
                     series: [{"name":"oppo自然量","type":"line","data":[0.1025,0.1122,0.1628,0.0973,0.1103,0.1077,0.1042,0.1261,0.0829,0.0833,0.098,0.0891,0.1111,0.0702,0.0885,0.0806,0.0862,0.0672,0.0508,0.0485,0.0543,0.0753,0.0529,0.0867,0.0992,0.0571,0.0753,0.0542,0.1009,0.0725,0.0874,0.0755,0.0732,0.0476,0.0299,0.0649,0.0551,0.0506,0.0162,0.0359,0.0642,0.0537,0.029,0.0242]},{"name":"vivo","type":"line","data":[0,0.1304,0.0909,0.0833,0.0526,0,0.0417,0.0435,0.129,0.0952,0.1818,0.1176,0,0.1538,0.1111,0.1111,0.1538,0.125,0.0909,0.0185,0.0769,0.0811,0.0476,0.0256,0.102,0.1034,0.0769,0.1064,0.1563,0.1,0.1163,0.1026,0.1364,0.0488,0.0732,0.0968,0.0227,0.1081,0.0303,0.0238,0,0.0238,0.0526,0]},{"name":"信息流","type":"line","data":[0,0.0741,0.1667,0.0909,0.125,0.1,0,0.1111,0.1429,0.2632,0,0,0.0909,0,0,0.1,0.0513,0.2,0,0.0851,0.0851,0.0465,0,0.0345,0,0,0.1212,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"其他","type":"line","data":[0.0833,0.125,0.0385,0.0625,0.0769,0.0909,0.0909,0.0769,0,0.0385,0,0.0714,0.0588,0.087,0.08,0,0.0513,0.0392,0,0.0563,0.0439,0.037,0.1481,0.0603,0.0283,0.0556,0.0957,0.0465,0.1277,0.0813,0.0547,0.05,0.0377,0.0789,0.056,0.1163,0.0667,0.0638,0.0385,0.0408,0.0088,0.0348,0.0204,0.0189]},{"name":"其他推广渠道","type":"line","data":[0.1193,0.2118,0.2381,0.2222,0.1667,0.2,0.1961,0.2045,0.186,0.2778,0.2692,0.1538,0.2727,0.3,0.3462,0.1176,0.25,0.2381,0.3846,0.2308,0.0882,0.2973,0.225,0.2963,0.2353,0.3846,0.2222,0.4,0.2308,0.25,0.0909,0.3,0.0833,0.2105,0.0769,0.1905,0.1333,0.1667,0.0833,0.1,0.0625,0.2143,0.1429,0]},{"name":"分享链接","type":"line","data":[0,0.0313,0.0682,0.0769,0.0313,0.0571,0.119,0.0313,0.0571,0.093,0.0286,0,0.0698,0.0476,0.0526,0.066,0.0682,0.0674,0,0.0469,0.1237,0.0714,0.0551,0.0875,0.0798,0.0283,0.0556,0.0578,0.058,0.0574,0.0336,0.0645,0.02,0.0517,0.0306,0.0296,0.0719,0.0682,0.0123,0.0656,0.0183,0.05,0.0469,0.0318]},{"name":"应用分发","type":"line","data":[0.0764,0.0998,0.1277,0.0784,0.0169,0.0825,0.0786,0.0948,0.0838,0.0906,0.0808,0.0556,0.0706,0.0742,0.0686,0.0803,0.0664,0.0612,0.0377,0.0775,0.0717,0.0868,0.0899,0.083,0.0804,0.0656,0.0446,0.0367,0.0549,0.0695,0.059,0.0282,0,0.0549,0.025,0.0256,0.0443,0.0352,0.05,0.0968,0.0129,0.018,0.0185,0]},{"name":"应用宝","type":"line","data":[0.0641,0.0843,0.0769,0.0556,0.0299,0.0588,0.1136,0.1494,0.1633,0.1,0.0847,0.0164,0.1392,0.1038,0.0256,0.1339,0.0647,0.0696,0.0678,0.0833,0.0505,0.0701,0.1227,0.0503,0.0719,0.0394,0.1198,0.0457,0.0783,0.0576,0.0962,0.0376,0.0526,0.0494,0.0435,0.0483,0.0581,0.0299,0.0611,0.0073,0.0366,0.036,0.0268,0.0694]},{"name":"搜索推广","type":"line","data":[0.0588,0,0,0,0,0,0,0,0,0,0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"钱包尾量","type":"line","data":[0.1556,0.0897,0.0893,0.0971,0.1275,0.1273,0.1176,0.125,0.125,0.1028,0.0971,0.0748,0.0918,0.1319,0.1136,0.0988,0.0667,0.039,0.0962,0.0563,0.1507,0.1061,0.0606,0.0658,0.18,0.1077,0.0164,0.0652,0.0364,0.0556,0.1129,0.0526,0.0545,0.0469,0.0746,0.0566,0,0.0476,0.058,0.0122,0,0.0167,0.0139,0]},{"name":"贷款超市推广","type":"line","data":[0,0,0,0,0,0,0,0,0.058,0.0714,0.0504,0.0641,0.131,0.0949,0.1288,0.0597,0.0776,0.089,0.0839,0.0755,0.0607,0.0889,0.1132,0.0877,0.125,0.1667,0.05,0.1333,0.0667,0.0588,0.2,0,0,0.0769,0.1111,0.0691,0.0942,0.0874,0.0447,0.0654,0.0707,0.0525,0.0353,0.0455]},{"name":"苹果APP STORE","type":"line","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.25,0,0.2,0.125,0,0,0,0,0,0,0.3333,0.2857,0,0.4286,0,0,0.2,0.2353,0.1875,0.05,0,0.1053,0,0.0769,0.1538,0,0.0833]}]
+                },
+                classOption:{
+                    title: {
+                        text: '用户等级变动'
+                    },
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    legend: {
+                        data:[0,1,2]
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : []
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                        }
+                    ],
+                    series : []
+
                 }
             }
         },
@@ -330,8 +536,17 @@
             this.channelRateChart = this.$echarts.init(document.getElementById('channelRateFlow'));
             this.channelRateChart.setOption(this.channelRateOption,true);
 
+            this.classChart = this.$echarts.init(document.getElementById('classFlow'));
+            this.classChart.setOption(this.classOption,true);
+
+
             this.dpdchart = this.$echarts.init(document.getElementById('main'));
             this.dpdchart.setOption(this.dpdOption,true);
+
+            this.dotmapchart = this.$echarts.init(document.getElementById('dotmap'));
+            this.$BaiduMap.init().then((BMap) => {
+                this.getDotmap();
+            })
         },
 
         methods: {
@@ -354,6 +569,21 @@
                 this.getData()
             },
             
+            //转换数据——获取逾期位置
+            getDotmap() {
+                this.$ajax.get('/dotData', {
+                    url: '/dotData',
+                    baseURL: process.env.API_BASEURL
+                }).then((res) => {
+                    this.dotdata=res.data.dotdata;
+                    this.geoCoordMap=res.data.geoCoordMap;
+                    // console.log(this.dotdata);
+                    this.dotmapOption.series[0].data=this.convertData(this.dotdata);
+                    this.dotmapOption.series[1].data=this.convertData(this.dotdata.filter(x=>parseInt(x.value)>30));
+                    this.dotmapchart.setOption(this.dotmapOption,true);
+                });
+            },
+
             //获取每日渠道数据
             getChannel() {
                 this.$ajax.get('/channelData', {
@@ -387,7 +617,22 @@
                     this.channelRateChart.setOption(this.channelRateOption,true);
                     this.tableData=res.data.tableData;
                     this.subTitle=Object.keys(res.data.tableData[0]);
-                })
+                    this.$ajax.get('/classData', {
+                    url: '/classData',
+                    baseURL: process.env.API_BASEURL,
+                    }).then((resB) => {
+                        this.classOption.series=resB.data.data;
+                        this.classOption.xAxis=[
+                            {
+                                type : 'category',
+                                boundaryGap : false,
+                                data : resB.data.dates
+                            }
+                        ];
+                        this.classOption.legend.data=resB.data.legend;
+                        this.classChart.setOption(this.classOption,true);
+                    });
+                });
             },
 
             //获取后台数据
@@ -765,6 +1010,21 @@
             thisInputBlur(ev) {
                 ev.target.blur();
             },
+            
+            //转换百度位置——dotmap
+            convertData (data) {
+                var res = [];
+                for (var i = 0; i < data.length; i++) {
+                    var geoCoord = this.geoCoordMap[data[i].name];
+                    if (geoCoord) {
+                        res.push({
+                            name: data[i].name,
+                            value: geoCoord.concat(data[i].value)
+                        });
+                    }
+                }
+                return res;
+            }
         }
     }
 </script>

@@ -14,6 +14,7 @@
     "cjs": "0.0.11",
     "cjs-loader": "^0.1.0",
     "echarts": "^4.1.0",
+    "echarts-gl": "^1.1.1",
     "element-ui": "^2.3.6",
     "es-to-primitive": "^1.1.1",
     "implementation": "^0.1.0",

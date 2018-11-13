@@ -13,14 +13,18 @@ require('echarts/theme/macarons');
 require('echarts/theme/infographic');
 require('echarts/theme/shine');
 require('echarts/map/js/china');
-
+require('echarts/map/js/world');
+require('echarts/extension/bmap/bmap');
 
 import 'element-ui/lib/theme-chalk/index.css'
+
+import BaiduMap from './assets/map'
 
 Vue.use(ElementUI);
 Vue.use(VueJsonp);
 Vue.prototype.$echarts = echarts;
 Vue.prototype.$ajax = axios;
+Vue.prototype.$BaiduMap = BaiduMap;
 Vue.config.productionTip = false;
 
 Vue.use(vuex);
