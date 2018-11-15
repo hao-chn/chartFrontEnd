@@ -87,6 +87,16 @@
             </div>
             <div id="channelRateFlow" :style="{width:'100%',height:'600px',margin:'0 0 2em 0'}">
             </div>
+            <!--newORold-->
+            <el-button-group style="margin-left: 2%;white-space: nowrap;">
+                <el-button v-for="(item2,index2) in userStatus" type="success"
+                    :key="item2"
+                    @click="changeStatus(item2,index2)"
+                    :class="{active2:backgroundColor2 == index2}"
+                    style="padding: 12px 10px">
+                    {{item2}}
+                </el-button>
+            </el-button-group>
             <div id="classFlow" :style="{width:'100%',height:'600px'}">
             </div>
         </el-card>
@@ -134,6 +144,8 @@
                 sectionIpt: true,
                 oldNew: ["All", "isNew", "isOld"],
                 isNew: "All",
+                userStatus: ["申请", "批复"],
+                postStatus:'apply',
                 backgroundColor2: 0,
                 xaxis: ["2018/3/17-2018/3/23",
                     "2018/3/24-2018/3/30", "2018/3/31-2018/4/6", "2018/4/7-2018/4/13", "2018/4/14-2018/4/20",
@@ -568,6 +580,21 @@
                 }
                 this.getData()
             },
+
+            changeStatus(boolString, index) {
+                this.backgroundColor2 = index;
+                switch (boolString) {
+                    case "申请" :
+                        this.postStatus = 'apply';
+                        break;
+                    case "批复" :
+                        this.postStatus = "approve";
+                        break;
+                    default:
+                        ;
+                }
+                this.getChannel()
+            },
             
             //转换数据——获取逾期位置
             getDotmap() {
@@ -592,7 +619,7 @@
                     params: {
                         dateS: this.decTime.timeSlotA[0],
                         dateF: this.decTime.timeSlotA[1],
-                        status:'apply'
+                        status: this.postStatus
                     }
                 }).then((res) => {
                     this.channelOption.series=res.data.data;
