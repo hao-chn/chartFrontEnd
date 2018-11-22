@@ -229,8 +229,6 @@
 </template>
 
 <script>
-    // import Btns from "../../components/md"
-    // import Enum from "../../components/enum"
 
     export default {
         name: "chart",
@@ -238,6 +236,9 @@
             return {
                 applications: [],
                 pickerOptions: {},
+                myChart: {},
+                productsChart: {},
+                ABChart: {},
                 chartDatas: {},
                 dayPSI: 0,
                 weekPSI: 0,
@@ -308,7 +309,7 @@
                     A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
                     B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
                 },
-                ABPSI: ''
+                ABPSI: '',
             }
         }
         ,
@@ -324,15 +325,32 @@
             this.drawLine();
             this.drawLine2();
             this.drawLineAB();
-            this.getProductsData()
+            this.getProductsData();
+
+
+            //监控bom大小;修改表格宽度
+            window.onresize = () => {
+                this.throttle(this.resize, window)
+            };
         }
         ,
         methods: {
+            resize() {
+                this.myChart.resize();
+                this.productsChart.resize();
+                this.ABChart.resize();
+            },
+            throttle(method, context) {
+                clearTimeout(method.tId);
+                method.tId = setTimeout(function () {
+                    method.call(context);
+                }, 500);
+            },
             //echarts初始化
             drawLine() {
-                let myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
-                window.onresize = myChart.resize();
-                myChart.setOption({
+                this.myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
+
+                this.myChart.setOption({
 
                     title: {
                         text: '用户score分布',
@@ -351,66 +369,81 @@
                     },
 
                     grid: {
-                        left: '3%',
+                        left: 'center',
+                        width: '95%',
                         top: '15%',
                         containLabel: true
                     },
 
                     legend: {
                         data: ['当日用户', '前一周用户', '前30天用户']
-                    },
+                    }
+                    ,
 
                     toolbox: {
                         show: true,
-                        feature: {
-                            mark: {
-                                show: true
-                            },
-                            dataView: {
-                                show: false,
-                                readOnly: false
-                            },
-                            magicType: {
-                                show: true,
-                                type: ['line', 'bar', 'stack', 'tiled']
-                            },
-                            restore: {
-                                show: true
-                            },
-                            saveAsImage: {
-                                show: true
+                        feature:
+                            {
+                                mark: {
+                                    show: true
+                                }
+                                ,
+                                dataView: {
+                                    show: false,
+                                    readOnly:
+                                        false
+                                }
+                                ,
+                                magicType: {
+                                    show: true,
+                                    type:
+                                        ['line', 'bar', 'stack', 'tiled']
+                                }
+                                ,
+                                restore: {
+                                    show: true
+                                }
+                                ,
+                                saveAsImage: {
+                                    show: true
+                                }
                             }
-                        },
+                        ,
                         x: 100,
-                        y: 20
-                    },
+                        y:
+                            20
+                    }
+                    ,
 
                     calculable: true,
 
-                    xAxis: [{
-                        type: 'category',
-                        boundaryGap: false,
-                        data: this.xAxis(),
-                        axisLabel: {
-                            interval: 'auto',
-                            rotate: 55
-                        },
-                    }],
+                    xAxis:
+                        [{
+                            type: 'category',
+                            boundaryGap: false,
+                            data: this.xAxis(),
+                            axisLabel: {
+                                interval: 'auto',
+                                rotate: 55
+                            },
+                        }],
 
-                    yAxis: {type: 'value'},
+                    yAxis:
+                        {
+                            type: 'value'
+                        }
+                    ,
 
                     series: []
-                });
+                })
+                ;
             },
 
             //以数值展示图片
             typeNumber() {
                 this.backgroundColor3 = 1;
                 if (this.ischartDatas == true) {
-                    let myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
-                    window.onresize = myChart.resize();
-
-                    myChart.setOption({
+                    this.productsChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -466,9 +499,7 @@
             typeRatio() {
                 this.backgroundColor3 = 0;
                 if (this.ischartDatas == true) {
-                    let myChart = this.$echarts.init(document.getElementById('myChart'), 'infographic');
-                    window.onresize = myChart.resize();
-                    myChart.setOption({
+                    this.myChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -530,12 +561,9 @@
 
             //chart2图骨架
             drawLine2() {
-                let myChart2 = this.$echarts.init(document.getElementById('productsChart'), 'shine');
-                myChart2.clear();
-                window.onresize = function () {
-                    myChart2.resize();
-                };
-                myChart2.setOption({
+                this.productsChart = this.$echarts.init(document.getElementById('productsChart'), 'shine');
+                this.productsChart.clear();
+                this.productsChart.setOption({
 
                     title: {
                         text: '产品score分布',
@@ -555,7 +583,8 @@
                     },
 
                     grid: {
-                        left: '3%',
+                        left: 'center',
+                        width: '95%',
                         top: '15%',
                         containLabel: true
                     },
@@ -610,8 +639,7 @@
             //chart图 数量
             typeNumber2() {
                 this.backgroundColor3 = 1;
-                let myChart2 = this.$echarts.init(document.getElementById('productsChart'), 'shine');
-                myChart2.setOption({
+                this.productsChart.setOption({
                     tooltip: {
                         align: 'left',
                         formatter: function (params) {
@@ -654,9 +682,7 @@
             //chart图 比例
             typeRatio2() {
                 this.backgroundColor3 = 0;
-                let myChart2 = this.$echarts.init(document.getElementById('productsChart'), 'shine');
-
-                myChart2.setOption({
+                this.productsChart.setOption({
                     tooltip: {
                         align: 'left',
                         formatter: function (params) {
@@ -1047,9 +1073,7 @@
             typeNumberAB() {
                 this.backgroundColor3 = 1;
                 if (this.ischartDatas == true) {
-                    let myChart = this.$echarts.init(document.getElementById('ABChart'), 'shine');
-                    window.onresize = myChart.resize();
-                    myChart.setOption({
+                    this.ABChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -1100,9 +1124,7 @@
             typeRatioAB() {
                 this.backgroundColor3 = 0;
                 if (this.ischartDatas == true) {
-                    let myChart = this.$echarts.init(document.getElementById('ABChart'), 'infographic');
-                    window.onresize = myChart.resize();
-                    myChart.setOption({
+                    this.ABChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -1156,9 +1178,8 @@
             },
 
             drawLineAB() {
-                let myChart = this.$echarts.init(document.getElementById('ABChart'), 'shine');
-                window.onresize = myChart.resize();
-                myChart.setOption({
+                this.ABChart = this.$echarts.init(document.getElementById('ABChart'), 'shine');
+                this.ABChart.setOption({
                     title: {
                         text: '用户score对比',
                         x: '0px',
@@ -1176,7 +1197,8 @@
                     },
 
                     grid: {
-                        left: '3%',
+                        left: 'center',
+                        width: '95%',
                         top: '15%',
                         containLabel: true
                     },
