@@ -6,6 +6,26 @@
 
 
             <div class="block" style="margin-bottom: 5px">
+                <!--<el-select id="scoreNameSelect" v-model="scoreNames[backgroundColor1]" placeholder="请选择">-->
+                <!--<el-option-->
+                <!--v-for="(item,index) in scoreNames"-->
+                <!--:key="item"-->
+                <!--:label="item"-->
+                <!--:value="item">-->
+                <!--</el-option>-->
+                <!--</el-select>-->
+                <!--scoreName-->
+                <div style="margin-bottom: 10px;white-space: nowrap">
+                    <el-button-group style="margin-left: 2%;white-space: nowrap;">
+                        <el-button v-for="(item1,index1) in scoreNames" type="primary"
+                            :key="index1"
+                            @click="changeScoreName(item1,index1)"
+                            :class="{active1:backgroundColor1 == index1}"
+                            style="padding: 12px 10px">
+                            {{item1}}
+                        </el-button>
+                    </el-button-group>
+                </div>
 
                 <!--date-->
                 <div style="display: inline-block">
@@ -15,23 +35,10 @@
                     </el-date-picker>
                 </div>
 
-                <!--scoreName-->
-                <div style="display: inline-block;margin-bottom: 10px;width: 260px;white-space: nowrap">
-                    <el-button-group style="margin-left: 2%;white-space: nowrap;">
-                        <el-button v-for="(item1,index1) in scoreNames" type="primary"
-                            :key="item1"
-                            @click="changeScoreName(item1,index1)"
-                            :class="{active1:backgroundColor1 == index1}"
-                            style="padding: 12px 10px">
-                            {{item1}}
-                        </el-button>
-                    </el-button-group>
-                </div>
-
                 <!--newORold-->
                 <el-button-group style="margin-left: 2%;white-space: nowrap;">
                     <el-button v-for="(item2,index2) in oldNew" type="success"
-                        :key="item2"
+                        :key="index2"
                         @click="newOrOld(item2,index2)"
                         :class="{active2:backgroundColor2 == index2}"
                         style="padding: 12px 10px">
@@ -45,7 +52,7 @@
                     <el-form-item label="产品：">
                         <el-select multiple v-model="productName" @input="productNameCheck"
                             style="">
-                            <el-option v-for="item in productNames" :key="item" :label="item" :value="item">
+                            <el-option v-for="(item,index) in productNames" :key="index" :label="item" :value="item">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -145,7 +152,7 @@
 
 
         <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
-            <div style="display: flex;justify-content: space-between">
+            <div style="display: flex;justify-content: space-around">
                 <div id="SizerA">
                     <el-date-picker
                         v-model="AB.timeSlotA"
@@ -178,6 +185,10 @@
 
             <!--chart-->
             <div id="ABChart" :style="{width:'100%',height:'400px'}"></div>
+            <!--PSI-->
+            <div>
+                <el-tag style="margin-bottom: 20px">PSI(AB): {{ABPSI}}</el-tag>
+            </div>
         </el-card>
 
         <!--scoreTable-->
@@ -218,8 +229,6 @@
 </template>
 
 <script>
-    // import Btns from "../../components/md"
-    // import Enum from "../../components/enum"
 
     export default {
         name: "chart",
@@ -227,6 +236,9 @@
             return {
                 applications: [],
                 pickerOptions: {},
+                myChart: {},
+                productsChart: {},
+                ABChart: {},
                 chartDatas: {},
                 dayPSI: 0,
                 weekPSI: 0,
@@ -251,15 +263,8 @@
                 isNew: "All",
                 thisDay: '',
                 scoreName: 'appscore',
-                subTitle: ["applicationId",
-                    "idNumber",
-                    "applyDate",
-                    "scoreName",
-                    "productName",
-                    "channelId",
-                    "isNew",
-                    "appscore"],
-
+                subTitle: ["applicationId", "idNumber", "applyDate", "scoreName",
+                    "productName", "channelId", "isNew", "appscore"],
                 subSection: 100,
                 maxScore: 1000,
                 productName: ['全部'],
@@ -297,9 +302,14 @@
                 seriesNb: [],
                 seriesRt: [],
                 AB: {
-                    timeSlotA:[new Date("2018-05-27"), new Date("2018-05-29")],
-                    timeSlotB:[new Date("2018-05-27"), new Date("2018-05-29")]
-                }
+                    timeSlotA: [new Date("2018-05-27"), new Date("2018-05-29")],
+                    timeSlotB: [new Date("2018-05-27"), new Date("2018-05-29")]
+                },
+                ABchartData: {
+                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                },
+                ABPSI: '',
             }
         }
         ,
@@ -314,15 +324,33 @@
             });
             this.drawLine();
             this.drawLine2();
-            this.getProductsData()
+            this.drawLineAB();
+            this.getProductsData();
+
+
+            //监控bom大小;修改表格宽度
+            window.onresize = () => {
+                this.throttle(this.resize, window)
+            };
         }
         ,
         methods: {
+            resize() {
+                this.myChart.resize();
+                this.productsChart.resize();
+                this.ABChart.resize();
+            },
+            throttle(method, context) {
+                clearTimeout(method.tId);
+                method.tId = setTimeout(function () {
+                    method.call(context);
+                }, 500);
+            },
             //echarts初始化
             drawLine() {
-                let myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
-                window.onresize = myChart.resize();
-                myChart.setOption({
+                this.myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
+
+                this.myChart.setOption({
 
                     title: {
                         text: '用户score分布',
@@ -341,66 +369,81 @@
                     },
 
                     grid: {
-                        left: '3%',
+                        left: 'center',
+                        width: '95%',
                         top: '15%',
                         containLabel: true
                     },
 
                     legend: {
                         data: ['当日用户', '前一周用户', '前30天用户']
-                    },
+                    }
+                    ,
 
                     toolbox: {
                         show: true,
-                        feature: {
-                            mark: {
-                                show: true
-                            },
-                            dataView: {
-                                show: false,
-                                readOnly: false
-                            },
-                            magicType: {
-                                show: true,
-                                type: ['line', 'bar', 'stack', 'tiled']
-                            },
-                            restore: {
-                                show: true
-                            },
-                            saveAsImage: {
-                                show: true
+                        feature:
+                            {
+                                mark: {
+                                    show: true
+                                }
+                                ,
+                                dataView: {
+                                    show: false,
+                                    readOnly:
+                                        false
+                                }
+                                ,
+                                magicType: {
+                                    show: true,
+                                    type:
+                                        ['line', 'bar', 'stack', 'tiled']
+                                }
+                                ,
+                                restore: {
+                                    show: true
+                                }
+                                ,
+                                saveAsImage: {
+                                    show: true
+                                }
                             }
-                        },
+                        ,
                         x: 100,
-                        y: 20
-                    },
+                        y:
+                            20
+                    }
+                    ,
 
                     calculable: true,
 
-                    xAxis: [{
-                        type: 'category',
-                        boundaryGap: false,
-                        data: this.xAxis(),
-                        axisLabel: {
-                            interval: 'auto',
-                            rotate: 55
-                        },
-                    }],
+                    xAxis:
+                        [{
+                            type: 'category',
+                            boundaryGap: false,
+                            data: this.xAxis(),
+                            axisLabel: {
+                                interval: 'auto',
+                                rotate: 55
+                            },
+                        }],
 
-                    yAxis: {type: 'value'},
+                    yAxis:
+                        {
+                            type: 'value'
+                        }
+                    ,
 
                     series: []
-                });
+                })
+                ;
             },
 
             //以数值展示图片
             typeNumber() {
                 this.backgroundColor3 = 1;
                 if (this.ischartDatas == true) {
-                    let myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
-                    window.onresize = myChart.resize();
-
-                    myChart.setOption({
+                    this.productsChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -435,11 +478,6 @@
                             {
                                 name: '前30天用户',
                                 type: 'line',
-                                // areaStyle: {
-                                //     normal: {
-                                //         type: 'default',
-                                //     }
-                                // },
                                 smooth: false,
                                 data: this.chartDatas.last30Days.chartData
                             }, {
@@ -450,11 +488,6 @@
                             }, {
                                 name: '当日用户',
                                 type: 'line',
-                                // areaStyle: {
-                                //     normal: {
-                                //         type: 'default',
-                                //     }
-                                // },
                                 smooth: false,
                                 data: this.chartDatas.today.chartData
                             }]
@@ -466,9 +499,7 @@
             typeRatio() {
                 this.backgroundColor3 = 0;
                 if (this.ischartDatas == true) {
-                    let myChart = this.$echarts.init(document.getElementById('myChart'), 'infographic');
-                    window.onresize = myChart.resize();
-                    myChart.setOption({
+                    this.myChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -511,31 +542,16 @@
                             {
                                 name: '前30天用户',
                                 type: 'line',
-                                // areaStyle: {
-                                //     normal: {
-                                //         type: 'default',
-                                //     }
-                                // },
                                 smooth: false,
                                 data: this.chartDatas.last30Days.ratioData
                             }, {
                                 name: '前一周用户',
                                 type: 'line',
-                                // areaStyle: {
-                                //     normal: {
-                                //         type: 'default',
-                                //     }
-                                // },
                                 smooth: false,
                                 data: this.chartDatas.lastWeek.ratioData
                             }, {
                                 name: '当日用户',
                                 type: 'line',
-                                // areaStyle: {
-                                //     normal: {
-                                //         type: 'default',
-                                //     }
-                                // },
                                 smooth: false,
                                 data: this.chartDatas.today.ratioData
                             }]
@@ -545,12 +561,9 @@
 
             //chart2图骨架
             drawLine2() {
-                let myChart2 = this.$echarts.init(document.getElementById('productsChart'), 'shine');
-                myChart2.clear();
-                window.onresize = function () {
-                    myChart2.resize();
-                };
-                myChart2.setOption({
+                this.productsChart = this.$echarts.init(document.getElementById('productsChart'), 'shine');
+                this.productsChart.clear();
+                this.productsChart.setOption({
 
                     title: {
                         text: '产品score分布',
@@ -570,7 +583,8 @@
                     },
 
                     grid: {
-                        left: '3%',
+                        left: 'center',
+                        width: '95%',
                         top: '15%',
                         containLabel: true
                     },
@@ -625,8 +639,7 @@
             //chart图 数量
             typeNumber2() {
                 this.backgroundColor3 = 1;
-                let myChart2 = this.$echarts.init(document.getElementById('productsChart'), 'shine');
-                myChart2.setOption({
+                this.productsChart.setOption({
                     tooltip: {
                         align: 'left',
                         formatter: function (params) {
@@ -669,9 +682,7 @@
             //chart图 比例
             typeRatio2() {
                 this.backgroundColor3 = 0;
-                let myChart2 = this.$echarts.init(document.getElementById('productsChart'), 'shine');
-
-                myChart2.setOption({
+                this.productsChart.setOption({
                     tooltip: {
                         align: 'left',
                         formatter: function (params) {
@@ -764,7 +775,6 @@
                 } else {
                     this.isometry = true;
                 }
-
                 this.scoreName = name;
                 this.subTitle[7] = name;
                 if (this.thisDay) {
@@ -998,6 +1008,259 @@
                 });
             },
 
+            //getProductsDataA
+            getProductsDataA() {
+                this.$ajax.get('/' + this.scoreName,
+                    {
+                        url: '/' + this.scoreName,
+                        baseURL: process.env.API_BASEURL,
+                        params: {
+                            applyDate: this.AB.timeSlotA[0].toString() + '|' + this.AB.timeSlotA[1].toString(),
+                            maxScore: this.maxScore,
+                            subSection: this.subSection,
+                            channelId: this.channelId,
+                            productName: this.productName,
+                            isNew: this.isNew,
+                            scoreName: this.scoreName,
+                            sectionIpt: this.sectionIpt
+                        }
+                    }).then(res => {
+                    this.ABchartData.A = res.data;
+                    this.ischartDatas = true;
+                    this.ABPSI =
+                        this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
+                }).then(() => {
+                    if (this.backgroundColor3 == 0) {
+                        this.typeRatioAB(true);
+                    } else if (this.backgroundColor3 == 1) {
+
+                        this.typeNumberAB(true);
+                    }
+                })
+            },
+            //getProductsDataB
+            getProductsDataB() {
+                this.$ajax.get('/' + this.scoreName, {
+                    url: '/' + this.scoreName,
+                    baseURL: process.env.API_BASEURL,
+                    params: {
+                        applyDate: this.AB.timeSlotB[0].toString() + '|' + this.AB.timeSlotB[1].toString(),
+                        maxScore: this.maxScore,
+                        subSection: this.subSection,
+                        channelId: this.channelId,
+                        productName: this.productName,
+                        isNew: this.isNew,
+                        scoreName: this.scoreName,
+                        sectionIpt: this.sectionIpt
+                    }
+                })
+                    .then(res => {
+                        this.ABchartData.B = res.data;
+                        this.ischartDatas = true;
+                        this.ABPSI =
+                            this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
+                    })
+                    .then(() => {
+                        if (this.backgroundColor3 == 0) {
+                            this.typeRatioAB(false);
+                        } else if (this.backgroundColor3 == 1) {
+                            this.typeNumberAB(false);
+                        }
+                    })
+            },
+
+            //以数值展示图片
+            typeNumberAB() {
+                this.backgroundColor3 = 1;
+                if (this.ischartDatas == true) {
+                    this.ABChart.setOption({
+                        tooltip: {
+                            align: 'left',
+                            formatter: function (params) {
+                                var relVal = params[0].name;
+                                for (var i = 0, l = params.length; i < l; i++) {
+                                    relVal += '<br/>' + params[i].seriesName + ' : ' + params[i].value + "人";
+                                }
+                                return relVal;
+                            }
+                        },
+
+                        xAxis: [{
+                            type: 'category',
+                            boundaryGap: false,
+                            data: this.xAxis(),
+                            axisLabel: {
+                                interval: 'auto',
+                                rotate: 55
+                            },
+                        }],
+
+                        yAxis: {
+                            type: 'value',
+                            axisLabel: {
+                                show: true,
+                                interval: 'auto',
+                                formatter: '{value}'
+                            },
+                        },
+
+                        series: [
+                            {
+                                name: 'A',
+                                type: 'line',
+                                smooth: false,
+                                data: this.ABchartData.A.all.chartData
+                            }, {
+                                name: 'B',
+                                type: 'line',
+                                smooth: false,
+                                data: this.ABchartData.B.all.chartData
+                            }]
+                    });
+                }
+            },
+
+            //以比例展示图片
+            typeRatioAB() {
+                this.backgroundColor3 = 0;
+                if (this.ischartDatas == true) {
+                    this.ABChart.setOption({
+                        tooltip: {
+                            align: 'left',
+                            formatter: function (params) {
+                                var relVal = params[0].name;
+                                for (var i = 0, l = params.length; i < l; i++) {
+                                    if (params[i].value != "NaN") {
+                                        relVal +=
+                                            '<br/>' + params[i].seriesName + ' : ' + params[i].value + "%";
+                                    } else {
+                                        relVal +=
+                                            '<br/>' + params[i].seriesName + ' : ' + '0' + "%";
+                                    }
+
+
+                                }
+                                return relVal;
+                            }
+                        },
+                        xAxis: [{
+                            type: 'category',
+                            boundaryGap: false,
+                            data: this.xAxis(),
+                            axisLabel: {
+                                interval: 'auto',
+                                rotate: 55
+                            },
+
+                        }],
+                        yAxis: {
+                            type: 'value',
+                            axisLabel: {
+                                show: true,
+                                interval: 'auto',
+                                formatter: '{value}%'
+                            },
+                        },
+                        series: [
+                            {
+                                name: 'A',
+                                type: 'line',
+                                smooth: false,
+                                data: this.ABchartData.A.all.ratioData
+                            }, {
+                                name: 'B',
+                                type: 'line',
+                                smooth: false,
+                                data: this.ABchartData.B.all.ratioData
+                            }]
+                    });
+                }
+            },
+
+            drawLineAB() {
+                this.ABChart = this.$echarts.init(document.getElementById('ABChart'), 'shine');
+                this.ABChart.setOption({
+                    title: {
+                        text: '用户score对比',
+                        x: '0px',
+                        y: '25px',
+                        textStyle: {
+                            fontSize: 14,
+                            color: "#40cc90"
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        position: function (p) {   //其中p为当前鼠标的位置
+                            return [p[0] - 65, p[1] - 10];
+                        }
+                    },
+
+                    grid: {
+                        left: 'center',
+                        width: '95%',
+                        top: '15%',
+                        containLabel: true
+                    },
+
+                    legend: {
+                        data: ['A', 'B']
+                    },
+
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {
+                                show: true
+                            },
+                            dataView: {
+                                show: false,
+                                readOnly: false
+                            },
+                            magicType: {
+                                show: true,
+                                type: ['line', 'bar', 'stack', 'tiled']
+                            },
+                            restore: {
+                                show: true
+                            },
+                            saveAsImage: {
+                                show: true
+                            }
+                        },
+                        x: 100,
+                        y: 20
+                    },
+
+                    calculable: true,
+
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        data: this.xAxis(),
+                        axisLabel: {
+                            interval: 'auto',
+                            rotate: 55
+                        },
+                    }],
+
+                    yAxis: {type: 'value'},
+
+                    series: [
+                        {
+                            name: 'A',
+                            type: 'line',
+                            smooth: false,
+                            data: this.ABchartData.A.all.ratioData
+                        }, {
+                            name: 'B',
+                            type: 'line',
+                            smooth: false,
+                            data: this.ABchartData.B.all.ratioData
+                        }]
+                });
+            },
+
 
         }
 
@@ -1005,6 +1268,7 @@
 </script>
 
 <style scoped>
+
     #home {
         margin: 10px;
         padding: 10px;
