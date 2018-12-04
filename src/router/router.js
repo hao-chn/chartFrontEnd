@@ -54,6 +54,11 @@ export default new Router({
         {
             path: "*",
             redirect: "/"
+        },
+        {
+            path: "/error",
+            name: "error",
+            component: Error,
         }
     ],
 

@@ -317,16 +317,12 @@
             this.$ajax.get('/home', {
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
-                
-headers: {
-       Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidmFuIiwiaWF0IjoxNTQzODkzMTkyLCJleHAiOjE1NDM4OTUxOTJ9.sbxWTxwNkE8oT9aEqqmfS99KxCyWGj2MIQPpZ4g5OCY"
-    }
             }).then((res) => {
                 console.log(res);
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
-            }).catch((err)=>{
+            }).catch((err) => {
                 console.log(err);
             });
             this.drawLine();
