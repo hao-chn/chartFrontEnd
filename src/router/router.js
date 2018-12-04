@@ -5,6 +5,8 @@ import Table from '@/pages/charts/table'
 import ChartART from '@/pages/charts/chart_ART'
 import Test from '@/pages/charts/test'
 import Embedding from '@/pages/charts/embedding'
+import Login from '@/pages/login/login'
+import Error from '@/pages/Error/404'
 
 Vue.use(Router);
 
@@ -12,14 +14,17 @@ export default new Router({
     routes: [
         {
             path: "/",
-            name: "chart",
-            component: Chart,
+            name: "error",
+            component: Error,
+        }, {
+            path: "/login",
+            name: "login",
+            component: Login,
         },
         {
             path: "/chart",
-            redirect: {
-                name: 'chart'
-            }
+            name: 'chart',
+            component: Chart,
         },
         {
             path: "/table01",

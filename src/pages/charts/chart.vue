@@ -318,9 +318,12 @@
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
+                console.log(res);
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
+            }).catch((err)=>{
+                console.log(err);
             });
             this.drawLine();
             this.drawLine2();
