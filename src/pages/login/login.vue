@@ -134,6 +134,7 @@
         height: 100vh;
         background: url("/static/img/bg_login.jpg") center no-repeat;
         background-size: cover;
+        overflow: hidden;
         padding-top: 0.1px;
     }
 
