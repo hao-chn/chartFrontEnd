@@ -82,18 +82,18 @@
         watch: {
             $route(to, from) {
                 this.pathName = to.name;
+                if (to.name == 'chart') {
+                    this.$ajax.get('/tableNames', {
+                        url: '/tableNames',
+                        baseURL: process.env.API_BASEURL,
+                    }).then((res) => {
+                        this.tableNames = res.data;
+                    });
+                }
             }
         },
         mounted() {
             this.pathName = this.$route.path.split('/')[1];
-            if (this.tableNames.length > 0) {
-                this.$ajax.get('/tableNames', {
-                    url: '/tableNames',
-                    baseURL: process.env.API_BASEURL,
-                }).then((res) => {
-                    this.tableNames = res.data;
-                });
-            }
         },
         methods: {
             handleSelect(key, keyPath) {
