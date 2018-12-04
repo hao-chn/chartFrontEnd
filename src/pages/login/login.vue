@@ -1,6 +1,9 @@
 <template>
     <div id="login">
         <div class="content" @keyup.tab="changeFocus" @keyup.enter="login">
+            <h1 style="text-shadow: 0px 0px 5px white, 0px 0px 10px white, 0px 0px 15px white;">
+                风控模型监测系统
+            </h1>
             <div class="inputBox" :class="!focusIndex?'border':''" @click="getFocus(0)">
                 <img src="/static/img/ic_blue_mail.png" height="24">
                 <input type="text" placeholder="邮箱" v-focus="!focusIndex" v-model="emailName">
@@ -12,7 +15,7 @@
                 <span :class="codeBtnCanClick?'getCode':''" @click="getCode">{{codeText}}</span>
             </div>
             <p style="color: rgba(255,255,255,0.7);background: rgba(0, 0, 0, 0.4);position: relative;top: -22px;">
-                token 有效期2000s
+                token 有效期2小时
             </p>
             <div class="login" @click="login">
                 <p :class="canLogin?'canLogin':''">{{canLogin?'登录':'请先输入邮箱名与验证码'}}</p>
