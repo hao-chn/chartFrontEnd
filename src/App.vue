@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <el-menu :default-active.stop="activeIndex" class="el-menu-demo" mode="horizontal"
-            @select="handleSelect"
+            @select="handleSelect" v-if="pathArr.indexOf(pathName)==-1"
             background-color="#545c64" text-color="#fff" active-text-color="#40cc90"
             style="position: fixed;width: 100%;z-index: 100;top: 0px; white-space: nowrap">
             <el-menu-item index="1" style="max-width:40px;padding: 0px 10px;" @click="toChart"
@@ -71,10 +71,22 @@
                 tableNames: [],
                 tipName03: "",
                 key: "",
+                pathName: "",
+                pathArr: [
+                    'error',
+                    'login',
+                    ''
+                ]
             };
         },
+        watch: {
+            $route(to, from) {
+                this.pathName = to.name;
+            }
+        },
         mounted() {
-            if (this.tableNames) {
+            this.pathName = this.$route.path.split('/')[1];
+            if (this.tableNames.length > 0) {
                 this.$ajax.get('/tableNames', {
                     url: '/tableNames',
                     baseURL: process.env.API_BASEURL,
@@ -104,7 +116,7 @@
             toTest() {
                 this.$router.push('/test');
             },
-            toEmbedding(){
+            toEmbedding() {
                 this.$router.push('/embedding')
             }
         }
