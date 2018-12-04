@@ -8,7 +8,7 @@ const Axios = axios.create({
     withCredentials: true, // 是否允许带cookie这些
     headers: {
         //   "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-        "Content-Type": "application/json;charset=utf-8"
+        // "Content-Type": "application/json;charset=utf-8"
     }
 });
 
