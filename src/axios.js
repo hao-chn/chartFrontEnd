@@ -54,7 +54,7 @@ Axios.interceptors.response.use(
                         messageIsOpened = !messageIsOpened;
                         MessageBox({
                             type: 'info',
-                            message: 'token验证失败，请重新登录'
+                            message: error.response.data.msg
                         }).then(()=>{
                             messageIsOpened = !messageIsOpened;
                         });
