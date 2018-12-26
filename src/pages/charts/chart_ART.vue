@@ -819,6 +819,8 @@
                         }
                     },
 
+                    color:['#CCB800','#7ACC00','#14CC00','#00CC52','#00CCB8','#007ACC','#0014CC','#5200CC','#B800CC','#CC007A','#CC0014','#FF6C0A','#FF9147','#0A9DFF','#47B6FF'],
+
                     grid: {
                         left: "50px",
                         top: '15%',
@@ -912,6 +914,9 @@
                             color: "#40cc90"
                         }
                     },
+
+                    color:['#CCB800','#7ACC00','#14CC00','#00CC52','#00CCB8','#007ACC','#0014CC','#5200CC','#B800CC','#CC007A','#CC0014','#FF6C0A','#FF9147','#0A9DFF','#47B6FF'],
+
 
                     tooltip: {
                         trigger: 'axis',
