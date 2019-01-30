@@ -329,7 +329,7 @@
             this.drawLine2();
             this.drawLineAB();
             this.getProductsData();
-
+            
 
             //监控bom大小;修改表格宽度
             window.onresize = () => {

@@ -82,7 +82,7 @@
         watch: {
             $route(to, from) {
                 this.pathName = to.name;
-                if (to.name == 'chart') {
+                if (to.name == 'chart') {            
                     this.$ajax.get('/tableNames', {
                         url: '/tableNames',
                         baseURL: process.env.API_BASEURL,
@@ -94,6 +94,9 @@
         },
         mounted() {
             this.pathName = this.$route.path.split('/')[1];
+        },
+        updated() { 
+            window.scroll(0, 0); 
         },
         methods: {
             handleSelect(key, keyPath) {
@@ -108,11 +111,12 @@
 
             toChart() {
                 this.$router.push('/chart');
+                // alert(document.documentElement.scrollTop)
             },
             toChartART() {
                 this.$router.push('/chartART');
             },
-
+            
             toTest() {
                 this.$router.push('/test');
             },
