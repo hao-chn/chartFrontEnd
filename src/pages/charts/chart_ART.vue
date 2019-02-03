@@ -492,14 +492,16 @@
                     title: {
                         text: '用户等级变动'
                     },
-                    tooltip : {
+                    tooltip: {
                         trigger: 'axis',
-                        axisPointer: {
-                            type: 'cross',
-                            label: {
-                                backgroundColor: '#6a7985'
-                            }
-                        }
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
                     },
                     legend: {
                         data:[0,1,2]
@@ -525,6 +527,9 @@
                     yAxis : [
                         {
                             type : 'value',
+                            axisLabel :{
+                                formatter:x=>Math.round(x*10000)/100+'%'
+                            }
                         }
                     ],
                     series : []
