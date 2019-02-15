@@ -313,7 +313,7 @@
             }
         }
         ,
-        mounted() {
+        mounted() {    
             this.$ajax.get('/home', {
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
@@ -329,7 +329,7 @@
             this.drawLine2();
             this.drawLineAB();
             this.getProductsData();
-
+            
 
             //监控bom大小;修改表格宽度
             window.onresize = () => {
@@ -446,7 +446,7 @@
             typeNumber() {
                 this.backgroundColor3 = 1;
                 if (this.ischartDatas == true) {
-                    this.productsChart.setOption({
+                    this.myChart.setOption({
                         tooltip: {
                             align: 'left',
                             formatter: function (params) {
@@ -809,6 +809,14 @@
 
             //修改日期获取数据
             changeDate() {
+                // function myDate(){
+                //     var myDate = new Date();
+                //         var F=myDate.getFullYear(); //获取完整的年份(4位,1970-????)
+                //         var  M=myDate.getMonth()+1; //获取当前月份(0-11,0代表1月) // 所以获取当前月份是myDate.getMonth()+1;
+                //         var D=myDate.getDate();
+                //         alert(F+"-"+M+"-"+D)
+                // }
+
                 if (this.thisDay) {
                     this.getDatas()
                 }
