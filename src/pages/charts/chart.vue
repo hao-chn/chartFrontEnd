@@ -189,7 +189,35 @@
             <div>
                 <el-tag style="margin-bottom: 20px">PSI(AB): {{ABPSI}}</el-tag>
             </div>
+            <div id="PSIMonthIn">
+                <h3 style="margin:20px 0">PSI月度分布</h3> 
+                <button @click="APSI()">刷新</button>
+
+                <table   border="1" cellspacing="0">
+                    <tr style="padding:20px;">
+                        <th></th>
+                        <th v-for="(title,index3) in this.PSIMonth" :key="index3" >{{title[0]}}</th>
+                    </tr>
+                    <tr v-for="(td,index4) in this.PSIMonth" :key="index4">
+                        <th>{{td[0]}}</th>
+                        <td>{{td[3]}}</td>  
+                        <td>{{td[4]}}</td>
+                        <td>{{td[5]}}</td>
+                        <td>{{td[6]}}</td>
+                        <td>{{td[7]}}</td>
+                        <td>{{td[8]}}</td>
+                        <td>{{td[9]}}</td>  
+    
+                        <!-- <th></th> -->
+                        
+                        <!-- <th v-for="(title,index3) in PSIMonth" :key="index3" >{{title[0].title}}</th> -->
+                    </tr> 
+                </table>
+            </div>
         </el-card>
+        
+        
+
 
         <!--scoreTable-->
         <el-card class="box-card" id="table01" style="text-align: left;margin-bottom: 20px;text-align: center;">
@@ -310,9 +338,19 @@
                     B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
                 },
                 ABPSI: '',
+                // MonthArray: ['2018-07','2018-08','2018-09','2018-10','2018-07','2018-07','2018-07','2018-07'],
+                PSIMonth: [],
+                PSIchartData: {
+                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                },
+
             }
         }
         ,
+        updated(){
+            
+        },
         mounted() {    
             this.$ajax.get('/home', {
                 url: '/home',
@@ -329,7 +367,8 @@
             this.drawLine2();
             this.drawLineAB();
             this.getProductsData();
-            
+            this.PSIMonthSub();
+
 
             //监控bom大小;修改表格宽度
             window.onresize = () => {
@@ -338,6 +377,89 @@
         }
         ,
         methods: {
+            // PSI月度分布
+            PSIMonthSub() {
+                let year = "2018";
+                let month = '7';
+                var timelock = true;
+                let k=0;
+                let PSIMonth = [];
+                function mGetDate(year, month){
+                    var d = new Date(year, month, 0);
+                    return d.getDate();
+                }
+                var atTimeYear = (new Date()).getFullYear()
+                var atTimemonth = (new Date()).getMonth()
+                while(timelock == true){
+                    if(year < atTimeYear){
+                        var day = mGetDate(year,month)
+                        var data = year + "-" + month + "-" + 1
+                        var data1 = year + "-" + month + "-" + day
+                            this.PSIMonth.push([])
+                            this.PSIMonth[k] = [data,data1]
+                            k++;
+                        month = parseInt(month) + 1;
+                        if(month > 12){
+                            year = parseInt(year) +1;
+                            month = 1;
+                        }
+                    }else if(year == atTimeYear){
+                        if(month <= atTimemonth){
+                                var day = mGetDate(year,month)
+                                var data = year + "-" + month + "-" + 1
+                                var data1 = year + "-" + month + "-" + day
+                                    this.PSIMonth.push([])
+                                    this.PSIMonth[k] = [data,data1]
+                                    k++;
+                                month = parseInt(month) + 1;
+                                if(month > 12){
+                                    year = parseInt(year) +1;
+                                    month = 1;
+                                }
+                            }else{
+                            timelock = false;
+                        }
+                    }else{
+                        timelock = false;
+                    }            
+                }
+
+                this.PSIMonth.forEach((item,index) => {
+                    // PSI计算
+                        this.$ajax.get('/' + this.scoreName,{
+                            url: '/' + this.scoreName,
+                            baseURL: process.env.API_BASEURL,
+                            params: {
+                                // applyDate: AB.timeSlotA[0].toString() + '|' + AB.timeSlotA[1].toString(),
+                                applyDate: item[0] + '|' + item[1],
+                                maxScore: this.maxScore,
+                                subSection: this.subSection,
+                                channelId: this.channelId,
+                                productName: this.productName,
+                                isNew: this.isNew,
+                                scoreName: this.scoreName,
+                                sectionIpt: this.sectionIpt
+                                }
+                            }).then(res => {
+                                // this.PSIchartData.A = res.data;
+                                 item.push(res.data.all.ratioData) 
+                        })
+                    // }
+                    
+                });  
+                           
+            },
+            
+            
+            APSI() {
+                this.PSIMonth.forEach((item,index) => {
+                    for(var j = 0; j < this.PSIMonth.length; j++){
+                        item.push(this.assessPSI(item[2],this.PSIMonth[j][2]))
+                    }
+                    this.$forceUpdate()
+                    console.log(this.PSIMonth)
+                })
+            },
             resize() {
                 this.myChart.resize();
                 this.productsChart.resize();
@@ -1036,15 +1158,16 @@
                             sectionIpt: this.sectionIpt
                         }
                     }).then(res => {
-                    this.ABchartData.A = res.data;
-                    this.ischartDatas = true;
-                    this.ABPSI =
+                        this.ABchartData.A = res.data;
+                        this.ischartDatas = true;   
+                        this.ABPSI =
                         this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
+                            sectionIpt: this.sectionIpt
                 }).then(() => {
                     if (this.backgroundColor3 == 0) {
                         this.typeRatioAB(true);
                     } else if (this.backgroundColor3 == 1) {
-
+                        
                         this.typeNumberAB(true);
                     }
                 })
@@ -1273,13 +1396,15 @@
             },
 
 
-        }
+        },
 
     }
 </script>
 
 <style scoped>
-
+    tr,th,td,table{
+        padding: 20px;
+    }
     #home {
         margin: 10px;
         padding: 10px;
@@ -1301,5 +1426,28 @@
         background: #328609 !important;
         border: #328609 1px solid !important;
     }
+    #PSIMonthIn{
+        position: relative;
 
+    }
+    #PSIMonthIn table {
+        width: 100%;
+        overflow: auto;
+        color: #909399;
+        border-color: #ebeef5;
+    }#PSIMonthIn td{
+        border-left: 0;
+    }
+    #PSIMonthIn button{
+        padding: 10px;
+        background: #409EFF;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 5px;
+        margin: 20px;
+        position: absolute;
+        top: -30px;
+        right: 400px;
+    
+    }
 </style>
