@@ -346,12 +346,16 @@
                 },
 
             }
-        }
-        ,
-        updated(){
-            
         },
-        mounted() {    
+        updated(){
+            // this.$nextTick(function(){
+            //     alert("此处填每次渲染完后执行的代码")
+            // })
+        },
+        mounted() {
+            // this.$nextTick(function(){
+            //     alert("此处填第一次渲染完成后执行的代码")
+            // })    
             this.$ajax.get('/home', {
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
@@ -369,13 +373,13 @@
             this.getProductsData();
             this.PSIMonthSub();
 
-
             //监控bom大小;修改表格宽度
             window.onresize = () => {
                 this.throttle(this.resize, window)
             };
-        }
-        ,
+            
+        },
+        
         methods: {
             // PSI月度分布
             PSIMonthSub() {
@@ -423,33 +427,42 @@
                         timelock = false;
                     }            
                 }
-
+                
                 this.PSIMonth.forEach((item,index) => {
+                    console.log(item)
                     // PSI计算
-                        this.$ajax.get('/' + this.scoreName,{
-                            url: '/' + this.scoreName,
-                            baseURL: process.env.API_BASEURL,
-                            params: {
-                                // applyDate: AB.timeSlotA[0].toString() + '|' + AB.timeSlotA[1].toString(),
-                                applyDate: item[0] + '|' + item[1],
-                                maxScore: this.maxScore,
-                                subSection: this.subSection,
-                                channelId: this.channelId,
-                                productName: this.productName,
-                                isNew: this.isNew,
-                                scoreName: this.scoreName,
-                                sectionIpt: this.sectionIpt
-                                }
-                            }).then(res => {
-                                // this.PSIchartData.A = res.data;
-                                 item.push(res.data.all.ratioData) 
-                        })
-                    // }
+                    this.$ajax.get('/' + this.scoreName,{
+                        url: '/' + this.scoreName,
+                        baseURL: process.env.API_BASEURL,
+                        params: {
+                            // applyDate: AB.timeSlotA[0].toString() + '|' + AB.timeSlotA[1].toString(),
+                            applyDate: item[0] + '|' + item[1],
+                            maxScore: this.maxScore,
+                            subSection: this.subSection,
+                            channelId: this.channelId,
+                            productName: this.productName,
+                            isNew: this.isNew,
+                            scoreName: this.scoreName,
+                            sectionIpt: this.sectionIpt
+                            }
+                        }).then(res => {
+                            // this.PSIchartData.A = res.data;
+                            item.push(res.data.all.ratioData) 
+                            // console.log(this.PSIMonth.length,index)
+                            if(this.PSIMonth.length <  index+2){
+                                setTimeout(()=>{
+                                    this.APSI()
+                                },1000)
+                            }
+                    }).then(() => {
+                        
+                    })
                     
-                });  
-                           
+                    // }
+                });
+                
+                // this.$nextTick()
             },
-            
             
             APSI() {
                 this.PSIMonth.forEach((item,index) => {
