@@ -191,33 +191,28 @@
             </div>
             <div id="PSIMonthIn">
                 <h3 style="margin:20px 0">PSI月度分布</h3> 
-                <button @click="APSI()">刷新</button>
+                <button @click="">刷新</button>
 
                 <table   border="1" cellspacing="0">
-                    <tr style="padding:20px;">
+                    <tr style="padding:20px;" id="across">
                         <th></th>
                         <th v-for="(title,index3) in this.PSIMonth" :key="index3" >{{title[0]}}</th>
                     </tr>
-                    <tr v-for="(td,index4) in this.PSIMonth" :key="index4">
+                    <tr v-for="(td,index4) in this.PSIMonth" :key="index4" id="vertical">
                         <th>{{td[0]}}</th>
-                        <td>{{td[3]}}</td>  
-                        <td>{{td[4]}}</td>
+
+                        <td v-for="(dd,index5) in td" v-if="!(index5 == 0 || index5 == 1 || index5 == 2)">{{td[index5]}}</td>  
+                        <!-- <td>{{td[4]}}</td>
                         <td>{{td[5]}}</td>
                         <td>{{td[6]}}</td>
                         <td>{{td[7]}}</td>
                         <td>{{td[8]}}</td>
                         <td>{{td[9]}}</td>  
-    
-                        <!-- <th></th> -->
-                        
-                        <!-- <th v-for="(title,index3) in PSIMonth" :key="index3" >{{title[0].title}}</th> -->
+                        <td>{{td[10]}}</td>  -->
                     </tr> 
                 </table>
             </div>
         </el-card>
-        
-        
-
 
         <!--scoreTable-->
         <el-card class="box-card" id="table01" style="text-align: left;margin-bottom: 20px;text-align: center;">
@@ -1415,8 +1410,12 @@
 </script>
 
 <style scoped>
-    tr,th,td,table{
-        padding: 20px;
+    table{
+        overflow:auto; 
+    }
+    tr,th,td{
+        /* border:0; */
+        padding: 10px;
     }
     #home {
         margin: 10px;
@@ -1441,6 +1440,7 @@
     }
     #PSIMonthIn{
         position: relative;
+        overflow: auto;
 
     }
     #PSIMonthIn table {
@@ -1448,8 +1448,24 @@
         overflow: auto;
         color: #909399;
         border-color: #ebeef5;
-    }#PSIMonthIn td{
+        border-right-color: #ebeef5 !important;
+        border-bottom-color: #ebeef5 !important;
+    }
+    #PSIMonthIn td{
         border-left: 0;
+        border-top:0;
+        border-right-color: #ebeef5 !important;
+        border-bottom-color: #ebeef5 !important;
+    }
+    #PSIMonthIn tr{
+        border-right-color: #ebeef5 !important;
+        border-bottom-color: #ebeef5 !important;
+    }
+    #vertical th{
+        border-right:1px solid #9a9ca1;
+    }
+    #across th{
+        border-bottom:1px solid #9a9ca1;
     }
     #PSIMonthIn button{
         padding: 10px;
@@ -1461,6 +1477,5 @@
         position: absolute;
         top: -30px;
         right: 400px;
-    
     }
 </style>
