@@ -1,10 +1,6 @@
 <template>
     <div id="home">
-
-
         <el-card class="box-card" id="chart" style="margin-top: 60px;margin-bottom: 30px">
-
-
             <div class="block" style="margin-bottom: 5px">
                 <!--<el-select id="scoreNameSelect" v-model="scoreNames[backgroundColor1]" placeholder="请选择">-->
                 <!--<el-option-->
@@ -189,10 +185,13 @@
             <div>
                 <el-tag style="margin-bottom: 20px">PSI(AB): {{ABPSI}}</el-tag>
             </div>
-            <div id="PSIMonthIn">
-                <h3 style="margin:20px 0">PSI月度分布</h3> 
-                <button @click="">刷新</button>
 
+            <!-- PSI月度分布表 -->
+            <div id="PSIMonthIn">
+                <h3 style="padding:=15px 0">PSI月度分布</h3> 
+                <button @click="">刷新</button>
+                <!-- 
+                    table表格
                 <table   border="1" cellspacing="0">
                     <tr style="padding:20px;" id="across">
                         <th></th>
@@ -202,15 +201,35 @@
                         <th>{{td[0]}}</th>
 
                         <td v-for="(dd,index5) in td" v-if="!(index5 == 0 || index5 == 1 || index5 == 2)">{{td[index5]}}</td>  
-                        <!-- <td>{{td[4]}}</td>
+                        <td>{{td[4]}}</td>
                         <td>{{td[5]}}</td>
                         <td>{{td[6]}}</td>
                         <td>{{td[7]}}</td>
                         <td>{{td[8]}}</td>
                         <td>{{td[9]}}</td>  
-                        <td>{{td[10]}}</td>  -->
+                        <td>{{td[10]}}</td> 
                     </tr> 
-                </table>
+                </table> -->
+                <el-table
+                    :data="tableDataPSIMonthIn"
+                    border style="min-width: 0px;max-height: 500px;margin-top: 50px;overflow-y: auto;overflow-x:
+                            hidden;float:
+                        right;text-align:center"
+                    >
+                        <el-table-column
+                        prop="vertical"
+                        label=""
+                        >
+                        </el-table-column>
+
+                        <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" 
+                        :prop="item[0]"
+                        :label= "item[0]" 
+                        >
+                        <!-- {{item[0]}} -->
+                        </el-table-column>
+
+                    </el-table>
             </div>
         </el-card>
 
@@ -333,29 +352,22 @@
                     B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
                 },
                 ABPSI: '',
-                // MonthArray: ['2018-07','2018-08','2018-09','2018-10','2018-07','2018-07','2018-07','2018-07'],
                 PSIMonth: [],
-                PSIchartData: {
-                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-                },
+                tableDataPSIMonthIn: [],
+                PSIMonthList:[],
+                tableData123:{}
 
             }
         },
         updated(){
-            // this.$nextTick(function(){
-            //     alert("此处填每次渲染完后执行的代码")
-            // })
+
         },
         mounted() {
-            // this.$nextTick(function(){
-            //     alert("此处填第一次渲染完成后执行的代码")
-            // })    
             this.$ajax.get('/home', {
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
-                console.log(res);
+                // console.log(res);
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
@@ -372,7 +384,6 @@
             window.onresize = () => {
                 this.throttle(this.resize, window)
             };
-            
         },
         
         methods: {
@@ -424,7 +435,6 @@
                 }
                 
                 this.PSIMonth.forEach((item,index) => {
-                    console.log(item)
                     // PSI计算
                     this.$ajax.get('/' + this.scoreName,{
                         url: '/' + this.scoreName,
@@ -443,30 +453,41 @@
                         }).then(res => {
                             // this.PSIchartData.A = res.data;
                             item.push(res.data.all.ratioData) 
-                            // console.log(this.PSIMonth.length,index)
                             if(this.PSIMonth.length <  index+2){
                                 setTimeout(()=>{
                                     this.APSI()
+                                    this.tabledataPSI()
                                 },1000)
                             }
                     }).then(() => {
-                        
                     })
-                    
-                    // }
                 });
-                
-                // this.$nextTick()
             },
-            
             APSI() {
                 this.PSIMonth.forEach((item,index) => {
                     for(var j = 0; j < this.PSIMonth.length; j++){
                         item.push(this.assessPSI(item[2],this.PSIMonth[j][2]))
                     }
                     this.$forceUpdate()
-                    console.log(this.PSIMonth)
                 })
+            },
+            // element PSI月份渲染
+            tabledataPSI(){
+                this.PSIMonthList= [];
+                this.tableDataPSIMonthIn=[]
+                this.PSIMonth.forEach((item,index) => {
+                    this.PSIMonthList.push(item[0])
+                })
+                this.PSIMonth.forEach((item,index) => {
+                    this.tableData123="";
+                    this.tableData123 = {
+                        vertical:item[0],
+                    }
+                    this.PSIMonthList.forEach((item1,index1) =>{
+                        this.tableData123[item1] = item[index1+3]
+                    })
+                    this.tableDataPSIMonthIn.push(this.tableData123)
+                })  
             },
             resize() {
                 this.myChart.resize();
@@ -1473,7 +1494,7 @@
         color: #fff;
         font-size: 16px;
         border-radius: 5px;
-        margin: 20px;
+        margin:35px;
         position: absolute;
         top: -30px;
         right: 400px;
