@@ -187,49 +187,17 @@
             </div>
 
             <!-- PSI月度分布表 -->
-            <div id="PSIMonthIn">
-                <h3 style="padding:=15px 0">PSI月度分布</h3> 
-                <button @click="">刷新</button>
-                <!-- 
-                    table表格
-                <table   border="1" cellspacing="0">
-                    <tr style="padding:20px;" id="across">
-                        <th></th>
-                        <th v-for="(title,index3) in this.PSIMonth" :key="index3" >{{title[0]}}</th>
-                    </tr>
-                    <tr v-for="(td,index4) in this.PSIMonth" :key="index4" id="vertical">
-                        <th>{{td[0]}}</th>
+            <div id="PSIMonthIn" style="margin:20px auto 0 auto">
+                <h3>PSI月度分布<el-button @click="PSIMonthSub" style="margin:0 auto 0 20px">刷新</el-button></h3> 
+                
+                <el-table :data="tableDataPSIMonthIn">
+                    <el-table-column prop="vertical" label="">
+                    </el-table-column>
 
-                        <td v-for="(dd,index5) in td" v-if="!(index5 == 0 || index5 == 1 || index5 == 2)">{{td[index5]}}</td>  
-                        <td>{{td[4]}}</td>
-                        <td>{{td[5]}}</td>
-                        <td>{{td[6]}}</td>
-                        <td>{{td[7]}}</td>
-                        <td>{{td[8]}}</td>
-                        <td>{{td[9]}}</td>  
-                        <td>{{td[10]}}</td> 
-                    </tr> 
-                </table> -->
-                <el-table
-                    :data="tableDataPSIMonthIn"
-                    border style="min-width: 0px;max-height: 500px;margin-top: 50px;overflow-y: auto;overflow-x:
-                            hidden;float:
-                        right;text-align:center"
-                    >
-                        <el-table-column
-                        prop="vertical"
-                        label=""
-                        >
-                        </el-table-column>
+                    <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0]">
+                    </el-table-column>
 
-                        <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" 
-                        :prop="item[0]"
-                        :label= "item[0]" 
-                        >
-                        <!-- {{item[0]}} -->
-                        </el-table-column>
-
-                    </el-table>
+                </el-table>
             </div>
         </el-card>
 
@@ -1459,44 +1427,5 @@
         background: #328609 !important;
         border: #328609 1px solid !important;
     }
-    #PSIMonthIn{
-        position: relative;
-        overflow: auto;
-
-    }
-    #PSIMonthIn table {
-        width: 100%;
-        overflow: auto;
-        color: #909399;
-        border-color: #ebeef5;
-        border-right-color: #ebeef5 !important;
-        border-bottom-color: #ebeef5 !important;
-    }
-    #PSIMonthIn td{
-        border-left: 0;
-        border-top:0;
-        border-right-color: #ebeef5 !important;
-        border-bottom-color: #ebeef5 !important;
-    }
-    #PSIMonthIn tr{
-        border-right-color: #ebeef5 !important;
-        border-bottom-color: #ebeef5 !important;
-    }
-    #vertical th{
-        border-right:1px solid #9a9ca1;
-    }
-    #across th{
-        border-bottom:1px solid #9a9ca1;
-    }
-    #PSIMonthIn button{
-        padding: 10px;
-        background: #409EFF;
-        color: #fff;
-        font-size: 16px;
-        border-radius: 5px;
-        margin:35px;
-        position: absolute;
-        top: -30px;
-        right: 400px;
-    }
+    
 </style>
