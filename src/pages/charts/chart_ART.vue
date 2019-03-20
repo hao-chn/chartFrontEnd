@@ -123,6 +123,36 @@
             </el-row>
         </el-card>
 
+        <!--Daily Conversion-->
+        <el-card class="box-card" id="dailyConversion" style="text-align: left;margin-bottom: 20px;text-align: center;">
+            <div>
+                <h2><b>产品转化漏斗</b></h2>
+                日期：
+                <el-date-picker
+                    v-model="conversionTime.timeSlotA"
+                    type="datetimerange"
+                    format="yyyy 年 MM 月 dd 日"
+                    value-format="yyyy-MM-dd"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    @change="getConversion"
+                    align="center"
+                    style="margin:1em">
+                </el-date-picker>
+                渠道：
+                <el-select multiple v-model="conversionChannels" @input="getConversion" placeholder="渠道">
+                    <el-option v-for="item in channelIds" :key="item.value" :label="item.label"
+                        :value="item.label">
+                    </el-option>
+                </el-select>
+            </div>
+            <div style="margin: 0px auto 10px; ">
+                <iframe id="conversionChart" src="http://mstaz.ga:8016/dailyConversion?dateS=2019-01-29&dateF=2019-02-02&channels=oppo,xiaomi" style="border:0; height:600px; width:100%"></iframe>
+                
+            </div>
+        </el-card>
+
         <el-card class="box-card" style="margin-bottom: 0px">
             <div id="main" :style="{width:'100%',height:'600px',marginBottom:'30px'}"></div>
             <div id="dotmap" :style="{width:'100%',height:'600px'}"></div>
@@ -154,9 +184,13 @@
                 backgroundColor3: 0,
                 channelId: ["0"],
                 channelIds: [],
+                conversionChannels:[],
                 decTime: {
                     timeSlotA:[new Date("2018-08-01"), new Date("2018-10-01")],
                     timeSlotB:[new Date("2018-08-01"), new Date("2018-10-01")]
+                },
+                conversionTime: {
+                    timeSlotA:[new Date("2019-02-01"), new Date("2018-02-01")]
                 },
                 dpdOption : {
                     title : {
@@ -492,14 +526,16 @@
                     title: {
                         text: '用户等级变动'
                     },
-                    tooltip : {
+                    tooltip: {
                         trigger: 'axis',
-                        axisPointer: {
-                            type: 'cross',
-                            label: {
-                                backgroundColor: '#6a7985'
-                            }
-                        }
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
                     },
                     legend: {
                         data:[0,1,2]
@@ -525,6 +561,9 @@
                     yAxis : [
                         {
                             type : 'value',
+                            axisLabel :{
+                                formatter:x=>Math.round(x*10000)/100+'%'
+                            }
                         }
                     ],
                     series : []
@@ -660,6 +699,12 @@
                         this.classChart.setOption(this.classOption,true);
                     });
                 });
+            },
+
+            //获取转化数据
+            getConversion(){
+                console.log(`http://mstaz.ga:8016/dailyConversion?dateS=${this.conversionTime.timeSlotA[0]}&dateF=${this.conversionTime.timeSlotA[1]}&channels=${this.conversionChannels.join(',')}`);
+                document.getElementById('conversionChart').src=`http://mstaz.ga:8016/dailyConversion?dateS=${this.conversionTime.timeSlotA[0]}&dateF=${this.conversionTime.timeSlotA[1]}&channels=${this.conversionChannels.join(',')}`
             },
 
             //获取后台数据
