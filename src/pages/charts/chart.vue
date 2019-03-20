@@ -199,7 +199,7 @@
                             <el-popover trigger="hover" placement="top">
                             <p>{{scope.row[item[0]]}}</p>
                             <div slot="reference" class="name-wrapper">
-                                <el-tag size="medium" class="scopeRow" >{{scope.row[item[0]]}}</el-tag>
+                                <el-tag size="medium" class="scopeRow" :class="scope.row[item[0]]>=0.2?'red':''" >{{scope.row[item[0]]}}</el-tag>
                             </div>
                             </el-popover>
                         </template>
@@ -343,7 +343,7 @@
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
-                // console.log(res);
+                // console.log(res,'res');
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
@@ -375,9 +375,10 @@
                     this.flag =false
                     setTimeout(() => {
                         this.flag = true
+                        this.PSIMonthSub();
                         this.open()
                         
-                    }, 3000);
+                    }, 2000);
                 }
             },
             // PSI月度分布
@@ -390,7 +391,7 @@
                 let month = '7';
                 var timelock = true;
                 let k=0;
-                let PSIMonth = [];
+                // let PSIMonth = [];
                 function mGetDate(year, month){
                     var d = new Date(year, month, 0);
                     return d.getDate();
@@ -435,6 +436,7 @@
                 // if
                 this.PSIMonth.forEach((item,index) => {
                     // PSI计算
+                    // console.log(this.scoreName,'01')
                     this.$ajax.get('/' + this.scoreName,{
                         url: '/' + this.scoreName,
                         baseURL: process.env.API_BASEURL,
@@ -451,6 +453,7 @@
                             }
                         }).then(res => {
                             // this.PSIchartData.A = res.data;
+                            // console.log(res,'1203')
                             item.push(res.data.all.ratioData) 
                             if(this.PSIMonth.length <  index+2){
                                 setTimeout(()=>{
@@ -1464,5 +1467,7 @@
         overflow: hidden;
         width: 59px !important;
     }
-    
+    .red{
+        color: red;
+    }
 </style>
