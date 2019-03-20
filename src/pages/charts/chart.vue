@@ -401,7 +401,10 @@
                         timelock = false;
                     }            
                 }
-                
+
+                console.log(this.PSIMonth.slice(-1,));
+                localStorage.ki=this.PSIMonth;
+                // if
                 this.PSIMonth.forEach((item,index) => {
                     // PSI计算
                     this.$ajax.get('/' + this.scoreName,{
