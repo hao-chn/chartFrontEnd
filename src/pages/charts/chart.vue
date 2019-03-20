@@ -188,13 +188,21 @@
 
             <!-- PSI月度分布表 -->
             <div id="PSIMonthIn" style="margin:20px auto 0 auto">
-                <h3>PSI月度分布<el-button @click="PSIMonthSub" style="margin:0 auto 0 20px">刷新</el-button></h3> 
+                <h3>PSI月度分布<el-button @click="PSIMonthRefresh" style="margin:0 auto 0 20px">刷新</el-button></h3> 
                 
                 <el-table :data="tableDataPSIMonthIn">
                     <el-table-column prop="vertical" label="">
                     </el-table-column>
 
                     <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0]">
+                        <template slot-scope="scope" >
+                            <el-popover trigger="hover" placement="top">
+                            <p>{{scope.row[item[0]]}}</p>
+                            <div slot="reference" class="name-wrapper">
+                                <el-tag size="medium" class="scopeRow" >{{scope.row[item[0]]}}</el-tag>
+                            </div>
+                            </el-popover>
+                        </template>
                     </el-table-column>
 
                 </el-table>
@@ -323,8 +331,8 @@
                 PSIMonth: [],
                 tableDataPSIMonthIn: [],
                 PSIMonthList:[],
-                tableData123:{}
-
+                tableData123:{},
+                flag:true
             }
         },
         updated(){
@@ -355,8 +363,29 @@
         },
         
         methods: {
+            open() {
+                this.$message({
+                    message: '刷新成功',
+                    type: 'success'
+                });
+            },
+            PSIMonthRefresh(){
+                // PSI月度分布点击按钮防抖
+                if(this.flag){
+                    this.flag =false
+                    setTimeout(() => {
+                        this.flag = true
+                        this.open()
+                        
+                    }, 3000);
+                }
+            },
             // PSI月度分布
             PSIMonthSub() {
+                this.PSIMonth=[];
+                this.tableDataPSIMonthIn=[];
+                this.PSIMonthList=[];
+                this.tableData123=[];
                 let year = "2018";
                 let month = '7';
                 var timelock = true;
@@ -402,7 +431,6 @@
                     }            
                 }
 
-                console.log(this.PSIMonth.slice(-1,));
                 localStorage.ki=this.PSIMonth;
                 // if
                 this.PSIMonth.forEach((item,index) => {
@@ -1429,6 +1457,12 @@
     .active2 {
         background: #328609 !important;
         border: #328609 1px solid !important;
+    }
+
+    .scopeRow{
+        white-space: normal;
+        overflow: hidden;
+        width: 59px !important;
     }
     
 </style>
