@@ -1407,7 +1407,7 @@
                                 show: true
                             },
                             dataView: {
-                                show: false,
+                                show: true,
                                 readOnly: false
                             },
                             magicType: {
@@ -1500,7 +1500,7 @@
                                 show: true
                             },
                             dataView: {
-                                show: false,
+                                show: true,
                                 readOnly: false
                             },
                             magicType: {
