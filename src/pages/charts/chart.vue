@@ -1379,9 +1379,14 @@
                     },
                     tooltip: {
                         trigger: 'axis',
-                        position: function (p) {   //其中p为当前鼠标的位置
-                            return [p[0] - 65, p[1] - 10];
-                        }
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
                     },
 
                     grid: {
@@ -1432,7 +1437,12 @@
                         },
                     }],
 
-                    yAxis: {type: 'value'},
+                    yAxis: {
+                        type: 'value',
+                        axisLabel :{
+                            formatter:x=>Math.round(x*10000)/100+'%'
+                        }
+                    },
 
                     series: [
                         {
@@ -1462,9 +1472,14 @@
                     },
                     tooltip: {
                         trigger: 'axis',
-                        position: function (p) {   //其中p为当前鼠标的位置
-                            return [p[0] - 65, p[1] - 10];
-                        }
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
                     },
 
                     grid: {
@@ -1515,7 +1530,12 @@
                         },
                     }],
 
-                    yAxis: {type: 'value'},
+                    yAxis: {
+                        type: 'value',
+                        axisLabel :{
+                            formatter:x=>Math.round(x*10000)/100+'%'
+                        }
+                    },
 
                     series: [
                         {
