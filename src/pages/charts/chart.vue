@@ -204,9 +204,13 @@
                             </el-popover>
                         </template>
                     </el-table-column>
-
                 </el-table>
             </div>
+            <!--chart-->
+            逾期&nbsp;
+            <el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:50px 0 20px 0"></el-input-number>
+            &nbsp;天
+            <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
         </el-card>
 
         <!--scoreTable-->
@@ -242,7 +246,6 @@
                 </el-col>
             </el-row>
         </el-card>
-
     </div>
 </template>
 
@@ -324,15 +327,17 @@
                     timeSlotB: [new Date("2018-05-27"), new Date("2018-05-29")]
                 },
                 ABchartData: {
-                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyRatio:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyRatio:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
                 },
                 ABPSI: '',
                 PSIMonth: [],
                 tableDataPSIMonthIn: [],
                 PSIMonthList:[],
                 tableData123:{},
-                flag:true
+                flag:true,
+                ABOverdue:{},
+                num:10
             }
         },
         updated(){
@@ -353,6 +358,7 @@
             this.drawLine();
             this.drawLine2();
             this.drawLineAB();
+            this.overdueAB();
             this.getProductsData();
             this.PSIMonthSub();
 
@@ -363,6 +369,18 @@
         },
         
         methods: {
+            // 逾期天数
+            handleChange(value){
+                this.num = value
+                if(this.flag){
+                    this.flag =false
+                    setTimeout(() => {
+                        this.getProductsDataA()
+                        this.getProductsDataB()
+                        this.flag = true
+                    }, 1000);
+                }
+            },
             open() {
                 this.$message({
                     message: '刷新成功',
@@ -495,6 +513,7 @@
                 this.myChart.resize();
                 this.productsChart.resize();
                 this.ABChart.resize();
+                this.ABOverdue.resize()
             },
             throttle(method, context) {
                 clearTimeout(method.tId);
@@ -1186,7 +1205,8 @@
                             productName: this.productName,
                             isNew: this.isNew,
                             scoreName: this.scoreName,
-                            sectionIpt: this.sectionIpt
+                            sectionIpt: this.sectionIpt,
+                            dpdCap:this.num
                         }
                     }).then(res => {
                         this.ABchartData.A = res.data;
@@ -1194,6 +1214,7 @@
                         this.ABPSI =
                         this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
                             sectionIpt: this.sectionIpt
+                        this.overdueAB();
                 }).then(() => {
                     if (this.backgroundColor3 == 0) {
                         this.typeRatioAB(true);
@@ -1216,7 +1237,8 @@
                         productName: this.productName,
                         isNew: this.isNew,
                         scoreName: this.scoreName,
-                        sectionIpt: this.sectionIpt
+                        sectionIpt: this.sectionIpt,
+                        dpdCap:this.num
                     }
                 })
                     .then(res => {
@@ -1224,6 +1246,7 @@
                         this.ischartDatas = true;
                         this.ABPSI =
                             this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
+                        this.overdueAB()
                     })
                     .then(() => {
                         if (this.backgroundColor3 == 0) {
@@ -1425,6 +1448,89 @@
                         }]
                 });
             },
+            overdueAB(){
+                this.ABOverdue = this.$echarts.init(document.getElementById('ABOverdue'), 'shine');
+                this.ABOverdue.setOption({
+                    title: {
+                        text: '用户逾期对比',
+                        x: '0px',
+                        y: '25px',
+                        textStyle: {
+                            fontSize: 14,
+                            color: "#40cc90"
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        position: function (p) {   //其中p为当前鼠标的位置
+                            return [p[0] - 65, p[1] - 10];
+                        }
+                    },
+
+                    grid: {
+                        left: 'center',
+                        width: '95%',
+                        top: '15%',
+                        containLabel: true
+                    },
+
+                    legend: {
+                        data: ['A', 'B']
+                    },
+
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {
+                                show: true
+                            },
+                            dataView: {
+                                show: false,
+                                readOnly: false
+                            },
+                            magicType: {
+                                show: true,
+                                type: ['line', 'bar', 'stack', 'tiled']
+                            },
+                            restore: {
+                                show: true
+                            },
+                            saveAsImage: {
+                                show: true
+                            }
+                        },
+                        x: 100,
+                        y: 20
+                    },
+
+                    calculable: true,
+
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        data: this.xAxis(),
+                        axisLabel: {
+                            interval: 'auto',
+                            rotate: 55
+                        },
+                    }],
+
+                    yAxis: {type: 'value'},
+
+                    series: [
+                        {
+                            name: 'A',
+                            type: 'line',
+                            smooth: false,
+                            data: this.ABchartData.A.all.delinquencyRatio
+                        }, {
+                            name: 'B',
+                            type: 'line',
+                            smooth: false,
+                            data: this.ABchartData.B.all.delinquencyRatio
+                        }]
+                });
+            }
 
 
         },
