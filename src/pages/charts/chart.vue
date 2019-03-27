@@ -206,10 +206,28 @@
                     </el-table-column>
                 </el-table>
             </div>
+            
+            <!--type-->
+            <el-button-group style="margin: 50px 0px 10px;margin-left: 2%;width: 300px">
+                <!-- <el-button type="primary" :class="{active1:backgroundColor3 == 0}" @click="overdueDay">
+                    逾期比例
+                </el-button> -->
+                <el-button type="primary" :class="{active1:backgroundColor6 == 1}" @click="overdue_num">
+                    逾期数量
+                </el-button>
+                <el-button type="primary" :class="{active1:backgroundColor6 == 2}" @click="release_num">
+                    放款数量
+                </el-button>
+            </el-button-group><br>
+            <!--chart-->
+            <div id="myOverdue" :style="{width:'100%',height:'600px'}"></div>
+
+
             <!--chart-->
             逾期&nbsp;
-            <el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:50px 0 20px 0"></el-input-number>
+            <el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 0 20px 0"></el-input-number>
             &nbsp;天
+
             <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
         </el-card>
 
@@ -277,6 +295,7 @@
                 backgroundColor3: 0,
                 backgroundColor4: 0,
                 backgroundColor5: 0,
+                backgroundColor6: 1, 
                 scoreNames: [],
                 oldNew: ["All", "isNew", "isOld"],
                 isometry: true,
@@ -327,8 +346,10 @@
                     timeSlotB: [new Date("2018-05-27"), new Date("2018-05-29")]
                 },
                 ABchartData: {
-                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyRatio:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyRatio:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                    A: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyRatio:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyCount:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    applyCount:[]}},
+                    B: {all: {ratioData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyRatio:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],delinquencyCount:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    applyCount:[]}},
                 },
                 ABPSI: '',
                 PSIMonth: [],
@@ -337,7 +358,8 @@
                 tableData123:{},
                 flag:true,
                 ABOverdue:{},
-                num:10
+                num:10,
+                myOverdue:{}
             }
         },
         updated(){
@@ -348,7 +370,7 @@
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
-                // console.log(res,'res');
+                console.log(res,'res');
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
@@ -361,6 +383,7 @@
             this.overdueAB();
             this.getProductsData();
             this.PSIMonthSub();
+            this.overdueNum();
 
             //监控bom大小;修改表格宽度
             window.onresize = () => {
@@ -369,6 +392,23 @@
         },
         
         methods: {
+            // //逾期天数
+            // typeRatio() {
+            //     this.backgroundColor3 = 0;
+            //     this.overdueDay()
+            // },
+
+            //逾期数量
+            overdue_num() {
+                this.backgroundColor6 = 1;
+                this.overdueNum(this.series_over())
+            },
+
+            //放款数量
+            release_num() {
+                this.backgroundColor6 = 2;
+                this.overdueNum(this.series_release())
+            },
             // 逾期天数
             handleChange(value){
                 this.num = value
@@ -513,7 +553,8 @@
                 this.myChart.resize();
                 this.productsChart.resize();
                 this.ABChart.resize();
-                this.ABOverdue.resize()
+                this.ABOverdue.resize();
+                this.myOverdue.resize()
             },
             throttle(method, context) {
                 clearTimeout(method.tId);
@@ -1209,12 +1250,15 @@
                             dpdCap:this.num
                         }
                     }).then(res => {
+                        console.log(res,'getProductsDataA')
                         this.ABchartData.A = res.data;
                         this.ischartDatas = true;   
                         this.ABPSI =
                         this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
                             sectionIpt: this.sectionIpt
                         this.overdueAB();
+                        this.overdueNum();
+                        this.overdue_num();
                 }).then(() => {
                     if (this.backgroundColor3 == 0) {
                         this.typeRatioAB(true);
@@ -1246,7 +1290,9 @@
                         this.ischartDatas = true;
                         this.ABPSI =
                             this.assessPSI(this.ABchartData.A.all.ratioData, this.ABchartData.B.all.ratioData);
-                        this.overdueAB()
+                        this.overdueAB();
+                        this.overdueNum();
+                        this.overdue_num();
                     })
                     .then(() => {
                         if (this.backgroundColor3 == 0) {
@@ -1550,8 +1596,120 @@
                             data: this.ABchartData.B.all.delinquencyRatio
                         }]
                 });
-            }
+            },
+            //逾期分布数量
+            overdueNum(series) {
+                
+                this.myOverdue = this.$echarts.init(document.getElementById('myOverdue'), 'shine');
+                this.myOverdue.clear();
+                this.myOverdue.setOption({
+                    title: {
+                        text: '用户对比',
+                        x: '0px',
+                        y: '25px',
+                        textStyle: {
+                            fontSize: 14,
+                            color: "#40cc90"
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
 
+                    grid: {
+                        left: 'center',
+                        width: '95%',
+                        top: '15%',
+                        containLabel: true
+                    },
+
+                    legend: {
+                        // data: ['A', 'B']
+                    },
+
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: {
+                                show: true
+                            },
+                            dataView: {
+                                show: true,
+                                readOnly: false
+                            },
+                            magicType: {
+                                show: true,
+                                type: ['line', 'bar', 'stack', 'tiled']
+                            },
+                            restore: {
+                                show: true
+                            },
+                            saveAsImage: {
+                                show: true
+                            }
+                        },
+                        x: 100,
+                        y: 20
+                    },
+
+                    calculable: true,
+
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        data: this.xAxis(),
+                        axisLabel: {
+                            interval: 'auto',
+                            rotate: 55
+                        },
+                    }],
+
+                    yAxis: {
+                        type: 'value',
+                    },
+                    series:series
+                    // series: [{
+                    //         name: 'A',
+                    //         type: 'bar',
+                    //         smooth: false,
+                    //         data: this.ABchartData.A.all.delinquencyCount
+                    //     },{
+                    //         name: 'B',
+                    //         type: 'bar',
+                    //         smooth: false,
+                    //         data: this.ABchartData.B.all.delinquencyCount
+                    //     }]
+                });
+            },
+            series_over(){
+                return [{
+                        name: 'A',
+                        type: 'bar',
+                        smooth: false,
+                        data: this.ABchartData.A.all.delinquencyCount
+                    },{
+                        name: 'B',
+                        type: 'bar',
+                        smooth: false,
+                        data: this.ABchartData.B.all.delinquencyCount
+                }]
+            },
+            series_release(){
+                return [{
+                        name: 'A',
+                        type: 'bar',
+                        smooth: false,
+                        data: this.ABchartData.A.all.applyCount
+                    },{
+                        name: 'B',
+                        type: 'bar',
+                        smooth: false,
+                        data: this.ABchartData.B.all.applyCount
+                }]
+            }
 
         },
 
@@ -1596,4 +1754,5 @@
     .red{
         color: red;
     }
+
 </style>
