@@ -227,8 +227,10 @@
             逾期&nbsp;
             <el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 0 20px 0"></el-input-number>
             &nbsp;天
-
             <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
+
+            <!--chart-->
+            <div id="overdueMonth" :style="{width:'100%',height:'400px'}"></div>
         </el-card>
 
         <!--scoreTable-->
@@ -359,7 +361,10 @@
                 flag:true,
                 ABOverdue:{},
                 num:10,
-                myOverdue:{}
+                myOverdue:{},
+                overdueMonth:{},
+                monthList:[],
+                seriesMon:[],
             }
         },
         updated(){
@@ -370,21 +375,22 @@
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
-                console.log(res,'res');
+                // console.log(res,'res');
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
             }).catch((err) => {
                 console.log(err);
             });
+            this.PSIMonthSub();
             this.drawLine();
             this.drawLine2();
             this.drawLineAB();
             this.overdueAB();
             this.getProductsData();
-            this.PSIMonthSub();
             this.overdueNum();
-
+            this.monthOverdue_series()
+            
             //监控bom大小;修改表格宽度
             window.onresize = () => {
                 this.throttle(this.resize, window)
@@ -392,12 +398,6 @@
         },
         
         methods: {
-            // //逾期天数
-            // typeRatio() {
-            //     this.backgroundColor3 = 0;
-            //     this.overdueDay()
-            // },
-
             //逾期数量
             overdue_num() {
                 this.backgroundColor6 = 1;
@@ -409,6 +409,7 @@
                 this.backgroundColor6 = 2;
                 this.overdueNum(this.series_release())
             },
+
             // 逾期天数
             handleChange(value){
                 this.num = value
@@ -417,6 +418,7 @@
                     setTimeout(() => {
                         this.getProductsDataA()
                         this.getProductsDataB()
+                        this.PSIMonthSub()
                         this.flag = true
                     }, 1000);
                 }
@@ -439,8 +441,12 @@
                     }, 2000);
                 }
             },
+
             // PSI月度分布
             PSIMonthSub() {
+                this.seriesMon.forEach((item3)=>{
+                    item3.data=[]
+                })
                 this.PSIMonth=[];
                 this.tableDataPSIMonthIn=[];
                 this.PSIMonthList=[];
@@ -489,17 +495,13 @@
                         timelock = false;
                     }            
                 }
-
                 localStorage.ki=this.PSIMonth;
-                // if
                 this.PSIMonth.forEach((item,index) => {
                     // PSI计算
-                    // console.log(this.scoreName,'01')
                     this.$ajax.get('/' + this.scoreName,{
                         url: '/' + this.scoreName,
                         baseURL: process.env.API_BASEURL,
                         params: {
-                            // applyDate: AB.timeSlotA[0].toString() + '|' + AB.timeSlotA[1].toString(),
                             applyDate: item[0] + '|' + item[1],
                             maxScore: this.maxScore,
                             subSection: this.subSection,
@@ -507,22 +509,27 @@
                             productName: this.productName,
                             isNew: this.isNew,
                             scoreName: this.scoreName,
-                            sectionIpt: this.sectionIpt
+                            sectionIpt: this.sectionIpt,
+                            dpdCap:this.num
                             }
                         }).then(res => {
-                            // this.PSIchartData.A = res.data;
-                            // console.log(res,'1203')
+                            // 数组变换 echart渲染
+                            res.data.all.approveCount.forEach((item1,i)=>{
+                                this.seriesMon[i].data.push(item1)
+                            })
                             item.push(res.data.all.ratioData) 
+                            // bug
                             if(this.PSIMonth.length <  index+2){
                                 setTimeout(()=>{
                                     this.APSI()
                                     this.tabledataPSI()
                                 },1000)
                             }
-                    }).then(() => {
                     })
                 });
             },
+
+            // KPI月份计算
             APSI() {
                 this.PSIMonth.forEach((item,index) => {
                     for(var j = 0; j < this.PSIMonth.length; j++){
@@ -531,12 +538,14 @@
                     this.$forceUpdate()
                 })
             },
+
             // element PSI月份渲染
             tabledataPSI(){
                 this.PSIMonthList= [];
                 this.tableDataPSIMonthIn=[]
                 this.PSIMonth.forEach((item,index) => {
                     this.PSIMonthList.push(item[0])
+
                 })
                 this.PSIMonth.forEach((item,index) => {
                     this.tableData123="";
@@ -548,13 +557,16 @@
                     })
                     this.tableDataPSIMonthIn.push(this.tableData123)
                 })  
+                this.monthOverdue(this.seriesMon)
+                // console.log(this.PSIMonth,this.tableDataPSIMonthIn,this.PSIMonthList,this.tableData123,'tabledataPSI')
             },
             resize() {
                 this.myChart.resize();
                 this.productsChart.resize();
                 this.ABChart.resize();
                 this.ABOverdue.resize();
-                this.myOverdue.resize()
+                this.myOverdue.resize();
+                this.overdueMonth.resize()
             },
             throttle(method, context) {
                 clearTimeout(method.tId);
@@ -562,12 +574,11 @@
                     method.call(context);
                 }, 500);
             },
+
             //echarts初始化
             drawLine() {
                 this.myChart = this.$echarts.init(document.getElementById('myChart'), 'shine');
-
                 this.myChart.setOption({
-
                     title: {
                         text: '用户score分布',
                         x: '0px',
@@ -583,19 +594,15 @@
                             return [p[0] - 65, p[1] - 10];
                         }
                     },
-
                     grid: {
                         left: 'center',
                         width: '95%',
                         top: '15%',
                         containLabel: true
                     },
-
                     legend: {
                         data: ['当日用户', '前一周用户', '前30天用户']
-                    }
-                    ,
-
+                    },
                     toolbox: {
                         show: true,
                         feature:
@@ -628,11 +635,8 @@
                         x: 100,
                         y:
                             20
-                    }
-                    ,
-
+                    },
                     calculable: true,
-
                     xAxis:
                         [{
                             type: 'category',
@@ -643,16 +647,12 @@
                                 rotate: 55
                             },
                         }],
-
                     yAxis:
                         {
                             type: 'value'
-                        }
-                    ,
-
+                        } ,
                     series: []
-                })
-                ;
+                });
             },
 
             //以数值展示图片
@@ -1234,6 +1234,7 @@
 
             //getProductsDataA
             getProductsDataA() {
+                console.log( this.AB.timeSlotA[0].toString() , this.AB.timeSlotA[1].toString(),'getProductsDataA-1')
                 this.$ajax.get('/' + this.scoreName,
                     {
                         url: '/' + this.scoreName,
@@ -1599,7 +1600,6 @@
             },
             //逾期分布数量
             overdueNum(series) {
-                
                 this.myOverdue = this.$echarts.init(document.getElementById('myOverdue'), 'shine');
                 this.myOverdue.clear();
                 this.myOverdue.setOption({
@@ -1612,6 +1612,7 @@
                             color: "#40cc90"
                         }
                     },
+
                     tooltip: {
                         trigger: 'axis',
                         axisPointer : {            // 坐标轴指示器，坐标轴触发有效
@@ -1671,17 +1672,6 @@
                         type: 'value',
                     },
                     series:series
-                    // series: [{
-                    //         name: 'A',
-                    //         type: 'bar',
-                    //         smooth: false,
-                    //         data: this.ABchartData.A.all.delinquencyCount
-                    //     },{
-                    //         name: 'B',
-                    //         type: 'bar',
-                    //         smooth: false,
-                    //         data: this.ABchartData.B.all.delinquencyCount
-                    //     }]
                 });
             },
             series_over(){
@@ -1709,10 +1699,77 @@
                         smooth: false,
                         data: this.ABchartData.B.all.applyCount
                 }]
+            },
+            // 放款月份柱状图
+            monthOverdue(series){
+                this.overdueMonth = this.$echarts.init(document.getElementById('overdueMonth'),'shine')
+                this.overdueMonth.clear()
+                this.overdueMonth.setOption({
+                    title: {
+                        text: '放款月份对比',
+                        x: '0px',
+                        y: '25px',
+                        textStyle: {
+                            fontSize: 14,
+                            color: "#40cc90"
+                        }
+                    },
+
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        },
+                        formatter: function (params) {
+                            var relVal = params[0].name;
+                            for (var i = 0, l = params.length; i < l; i++) {
+                                relVal += '<br/>' + params[i].seriesName + ' : ' + params[i].value + "人";
+                            }
+                            return relVal;
+                        },
+                    },
+
+                    legend: {
+                    },
+
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+
+                    yAxis: [{
+                        type: 'value',
+                        
+                    }],
+
+                    xAxis: {
+                        type: 'category',
+                        data:this.PSIMonthList,
+                    },
+
+                    series:series
+                })
+            },
+
+            monthOverdue_series(){
+                this.xAxis().forEach((item,index)=>{
+                    this.seriesMon.push({
+                        name: item,
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: []
+                    })
+                })
             }
-
         },
-
     }
 </script>
 
