@@ -1741,7 +1741,9 @@
 
                     yAxis: [{
                         type: 'value',
-                        
+                        formatter:function(params){
+                            
+                        }
                     }],
 
                     xAxis: {
