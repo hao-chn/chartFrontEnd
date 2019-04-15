@@ -230,7 +230,11 @@
             <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
 
             <!--chart-->
-            <div id="overdueMonth" :style="{width:'100%',height:'400px'}"></div>
+            <el-button-group>
+                <el-button type="primary" @click="monthOverdue(seriesMon)">数量</el-button>
+                <el-button type="primary" @click="monthOverdue_Ratio(seriesMon)">比例<i class=" el-icon--right"></i></el-button>
+            </el-button-group>
+            <div id="overdueMonth" :style="{width:'100%',height:'400px'}" style="margin-top:10px"></div>
         </el-card>
 
         <!--scoreTable-->
@@ -375,7 +379,6 @@
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
-                // console.log(res,'res');
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
@@ -557,7 +560,9 @@
                     })
                     this.tableDataPSIMonthIn.push(this.tableData123)
                 })  
+                // 初始显示状态  数量/比例
                 this.monthOverdue(this.seriesMon)
+                // this.monthOverdue_Ratio(this.seriesMon)
                 // console.log(this.PSIMonth,this.tableDataPSIMonthIn,this.PSIMonthList,this.tableData123,'tabledataPSI')
             },
             resize() {
@@ -1234,7 +1239,7 @@
 
             //getProductsDataA
             getProductsDataA() {
-                console.log( this.AB.timeSlotA[0].toString() , this.AB.timeSlotA[1].toString(),'getProductsDataA-1')
+                // console.log( this.AB.timeSlotA[0].toString() , this.AB.timeSlotA[1].toString(),'getProductsDataA-1')
                 this.$ajax.get('/' + this.scoreName,
                     {
                         url: '/' + this.scoreName,
@@ -1251,7 +1256,7 @@
                             dpdCap:this.num
                         }
                     }).then(res => {
-                        console.log(res,'getProductsDataA')
+                        // console.log(res,'getProductsDataA')
                         this.ABchartData.A = res.data;
                         this.ischartDatas = true;   
                         this.ABPSI =
@@ -1749,6 +1754,66 @@
                     xAxis: {
                         type: 'category',
                         data:this.PSIMonthList,
+                    },
+
+                    series:series
+                })
+            },
+            // 放款月份柱状图
+            monthOverdue_Ratio(series){
+                this.overdueMonth = this.$echarts.init(document.getElementById('overdueMonth'),'shine')
+                this.overdueMonth.clear()
+                this.overdueMonth.setOption({
+                    title: {
+                        text: '放款月份对比',
+                        x: '0px',
+                        y: '25px',
+                        textStyle: {
+                            fontSize: 14,
+                            color: "#40cc90"
+                        }
+                    },
+
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer : {        // 坐标轴指示器，坐标轴触发有效
+                            type : 'shadow'    // 默认为直线，可选为：'line' | 'shadow'
+                        },
+                        formatter: function (params) {
+                            var relVal =  params[0].name;
+                            var num = 0;
+                            for(var i = 0;i < params.length; i++){
+                                num = num + params[i].value
+                            }
+                            for(var j = 0; j < params.length; j++){
+                                relVal += '<br/>' + params[j].seriesName + ' : ' + ((params[j].value/num)*100).toFixed(2) + '%';
+                            }
+                            return relVal;
+                        },
+                    },
+
+                    legend: {
+                    },
+
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+
+                    yAxis: [{
+                        type: 'value',
+                        
+                    }],
+
+                    xAxis: {
+                        type: 'category',
+                        data:this.PSIMonthList,
+                        // axisLabel: {
+                        //     interval: 'auto',
+                        //     rotate: 55
+                        // },
                     },
 
                     series:series
