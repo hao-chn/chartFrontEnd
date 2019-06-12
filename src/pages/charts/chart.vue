@@ -441,36 +441,40 @@ import { watch } from 'fs';
                 tableDataOverdueTo:[],
                 tableDataCut: [
                     {
-                    data:'overallPass',
-                    overallPass: '20%',
-                    gainPass: '54%',
-                    passOverdue:'33.5%',
-                    RefuseOverdue: '59%'
+                    data:'800',
+                    '通过整体率': '0.8',
+                    '增益通过率': '0',
+                    '通过逾期率': '12.00%',
+                    '拒绝逾期率': 'NA'
                     },
                     {
-                    data:'gainPass',
-                    overallPass: '20%',
-                    gainPass: '30%',
-                    passOverdue:'39%',
-                    RefuseOverdue: '46%'
+                    data:'750',
+                    '通过整体率': '0.7',
+                    '增益通过率': '0.9',
+                    '通过逾期率': '11.00%',
+                    '拒绝逾期率': '21.00%'
                     },
                     {
-                    data:'passOverdue',
-                    overallPass: '20%',
-                    gainPass: '30%',
-                    passOverdue:'46%',
-                    RefuseOverdue: '35%'
+                    data:'700',
+                    '通过整体率': '0.6',
+                    '增益通过率': '0.8',
+                    '通过逾期率': '10.00%',
+                    '拒绝逾期率': '20.00%'
                     },
                     {
-                    data:'RefuseOverdue',
-                    overallPass: '20%',
-                    gainPass: '30%',
-                    passOverdue:'35%',
-                    RefuseOverdue: '89%'
+                    data:'650',
+                    '通过整体率': '0.4',
+                    '增益通过率': '0.7',
+                    '通过逾期率': '9.00%',
+                    '拒绝逾期率': '19.00%'
                     },
 
                 ],
-                tableDataCutTo:{label:['overallPass','gainPass','passOverdue','RefuseOverdue']}
+                tableDataCutTo:{
+                    // label:['overallPass','gainPass','passOverdue','RefuseOverdue']
+                    // label:['800','750','700','650']
+                    label:['通过整体率','增益通过率','通过逾期率','拒绝逾期率']
+                }
                 
             }
         },
@@ -1439,15 +1443,17 @@ import { watch } from 'fs';
                 // this.tableDataOverdueTo.CaptureRate = CaptureRate.filter( function (item){
                 //     return item == '0'?null:item
                 // }) 
-                
-                this.tableDataOverdueTo.CaptureRate = [null,null ,'0.3','0.29','0.3','0.4','0.5','0.6','0.7','0.8']
-                this.tableDataOverdueTo.CaptureRateExp=[null,null ,'0.23','0.29','0.35','0.43','0.55','0.62','0.7','0.85']
-
                 // this.tableDataOverdueTo.BadPct=BadPct.filter( function (item){
                 //     return item == '0'?null:item
                 // }) 
-                this.tableDataOverdueTo.BadPct = [null,null ,'0.3','0.29','0.3','0.4','0.5','0.6','0.7','0.8']
-                this.tableDataOverdueTo.BadPctExp=[null,null ,'0.23','0.29','0.35','0.43','0.55','0.62','0.7','0.85']
+                // 模拟数据
+                this.tableDataOverdueTo.Grp_Size = ['200','1000','3000','3500','4000','5000','2000','1500','1000','500']
+                this.tableDataOverdueTo.KS = ['0.2','0.3','0.4','0.35','0.2','0.15','0.1','0.05','0.03','0']
+                this.tableDataOverdueTo.CaptureRate = [0.4,0.7 ,0.8,0.85,0.9,0.94,0.97,0.99,1,1]
+                this.tableDataOverdueTo.CaptureRateExp=[0.3,0.5 ,0.65,0.7,0.75,0.8,8.5,0.9,0.95,1]
+
+                this.tableDataOverdueTo.BadPct = [0.13,0.12 ,0.08,0.07,0.06,0.07,0.6,0.5,0.5,0.6]
+                this.tableDataOverdueTo.BadPctExp=['0.15','0.13','0.12','0.10','0.6','0.5','0.4','0.3',0.2,0.1]
 
                 this.overdueExpressionWay()
                 this.overdueCatchWay()
@@ -2149,21 +2155,31 @@ import { watch } from 'fs';
                 cutProportion.clear();
                 let option = {
                     legend: {},
-                    tooltip: {},
+                    tooltip: {
+                    //     trigger: 'axis',
+                    //     formatter: function (datas) {
+                    //     var res = datas[0].name + '<br/>'
+                    //     for (var i = 0, length = datas.length; i < length; i++) {
+                    //        res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                    //            + Math.round(datas[i].data*100)/100+'%' + '<br/>'
+                    //      }
+                    //      return res
+                    //    }
+                    },
                     dataset: {
                         source: [
                             ['product', '2015', '2016'],
-                            ['Matcha Latte', 43.3, 85.7],
-                            ['Milk Tea', 83.1, 73.4],
-                            ['Cheese Cocoa', 86.4, 65.2],
-                            ['Walnut Brownie', 72.4, 53.9]
+                            ['800', 43.3, 85.7],
+                            ['750', 83.1, 73.4],
+                            ['700', 86.4, 65.2],
+                            ['650', 72.4, 53.9]
                         ]
                     },
                     xAxis: {type: 'category'},
                     yAxis: {
-                        // axisLabel :{
-                        //     formatter:x=>Math.round(x*10000)/100+'%'
-                        // }
+                        axisLabel :{
+                            formatter:x=>Math.round(x*100)/100+'%'
+                        }
                     },
                     series: [
                         {type: 'bar'},
