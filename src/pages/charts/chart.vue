@@ -1439,7 +1439,7 @@ import { watch } from 'fs';
 
                 // 重新加载
                 this.tableDataOverdueTo.score=score
-                this.tableDataOverdueTo.Grp_Size=Grp_Size
+                // this.tableDataOverdueTo.Grp_Size=Grp_Size
                 // this.tableDataOverdueTo.CaptureRate = CaptureRate.filter( function (item){
                 //     return item == '0'?null:item
                 // }) 
@@ -1462,22 +1462,28 @@ import { watch } from 'fs';
                     switch(item.vertical){
                         case 'Grp_Size':
                             score.forEach((itemA,indexA)=>{
-                                item[itemA] = Grp_Size[indexA]
+                                item[itemA] = this.tableDataOverdueTo.Grp_Size[indexA]
                             })
                             break;
                         case 'Capture Rate':
                             score.forEach((itemA,indexA)=>{
-                                item[itemA] = CaptureRate[indexA]
+                                item[itemA] = this.tableDataOverdueTo.CaptureRate[indexA]
                             })
                             break;
                         case 'Capture Rate Exp':
+                            score.forEach((itemA,indexA)=>{
+                                item[itemA] = this.tableDataOverdueTo.BadPct[indexA]
+                            })
                             break;
                         case 'Bad Pct':
                             score.forEach((itemA,indexA)=>{
-                                item[itemA] = BadPct[indexA]
+                                item[itemA] = this.tableDataOverdueTo.BadPct[indexA]
                             })
                             break;
                         case 'Bad Pct Exp':
+                            score.forEach((itemA,indexA)=>{
+                                item[itemA] = this.tableDataOverdueTo.BadPct[indexA]
+                            })
                             break;
                     }
                     
