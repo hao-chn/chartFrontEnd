@@ -9,8 +9,6 @@
                     @change="changeDate" style="margin: 10px 20px">
                 </el-date-picker>
             </div>
-
-
             <!--weeksNb-->
             <div class="demo-input-suffix"
                 style="color: #a8a8a8;display: inline-block;width: 280px;margin: 5px 10px 5px">
@@ -68,7 +66,6 @@
         <el-card class="box-card" style="margin-bottom: 30px;text-align: center">
             <div class="block">
                 <h3><b>渠道进件变动情况（新用户）</b></h3>
-
                     <el-date-picker
                         v-model="decTime.timeSlotA"
                         type="datetimerange"
