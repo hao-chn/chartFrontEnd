@@ -272,30 +272,64 @@
         </el-card>
         <!-- 模型KS值 -->
         <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+            <h4 style="margin:20px 0">KS值</h4>
             <el-table
-                :data="tableData"
+                :data="tableDataOverdue"
+                border
+                style="width: 100%" 
+                >
+                <el-table-column prop="vertical" label="score" width="140" header-align='center'>
+                </el-table-column>
+                <el-table-column
+                v-for="(item,index) in this.tableDataOverdueTo.score" :key='index'
+                :label="item"
+                :prop='item'
+                 >
+                    <!-- hover显示全部，采用overflow -->
+                    <template slot-scope="scope">
+                        <el-popover trigger="hover" placement="top">
+                        <p>{{ scope.row[item] }}</p>
+                        <div slot="reference" class="name-wrapper">
+                            <el-tag size="medium" class="scopeRow">{{ scope.row[item] }}</el-tag>
+                        </div>
+                        </el-popover>
+                    </template>
+                </el-table-column>
+
+            </el-table>
+            <!-- 逾期捕捉比例折线图 -->
+            <div id="overdueCatch" class="marginTop60" :style="{width:'100%',height:'400px'}"></div>
+            <!-- 逾期表现折线图 -->
+            <div id="overdueExpression" class="marginTop60" :style="{width:'100%',height:'400px'}"></div>
+        </el-card>
+        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+            <h4 style="margin:20px 0">CUT值监控</h4>
+            <el-table
+                :data="tableDataCut"
                 border
                 style="width: 100%">
                 <el-table-column
-                prop="date"
-                label="日期"
-                width="180">
+                prop="data"
+                label="CUT"
+                width="140" header-align='center'>
                 </el-table-column>
-                <el-table-column
-                prop="name"
-                label="姓名"
-                width="180">
+                <el-table-column header-align='center'  
+                v-for="(item,index) in this.tableDataCutTo.label" :key= 'index'
+                :prop="item"
+                :label="item"
+                width=""
+                >
                 </el-table-column>
-                <el-table-column
-                prop="address"
-                label="地址">
-                </el-table-column>
+
             </el-table>
+            <!-- CUT值监控柱状图 -->
+            <div id="cutProportion" class="marginTop60" :style="{width:'100%',height:'400px'}"></div>
         </el-card>
     </div>
 </template>
 
 <script>
+import { watch } from 'fs';
 
     export default {
         name: "chart",
@@ -391,23 +425,53 @@
                 overdueMonth:{},
                 monthList:[],
                 seriesMon:[],
-                tableData: [{
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
+                tableDataOverdue: [
+                    {
+                        vertical:'Grp_Size',
                     }, {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1517 弄'
+                        vertical:'Capture Rate',
                     }, {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1519 弄'
+                        vertical:'Capture Rate Exp',
                     }, {
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1516 弄'
-                }]
+                        vertical:'Bad Pct',
+                    }, {
+                        vertical:'Bad Pct Exp',
+                    }
+                ],
+                tableDataOverdueTo:[],
+                tableDataCut: [
+                    {
+                    data:'overallPass',
+                    overallPass: '20%',
+                    gainPass: '54%',
+                    passOverdue:'33.5%',
+                    RefuseOverdue: '59%'
+                    },
+                    {
+                    data:'gainPass',
+                    overallPass: '20%',
+                    gainPass: '30%',
+                    passOverdue:'39%',
+                    RefuseOverdue: '46%'
+                    },
+                    {
+                    data:'passOverdue',
+                    overallPass: '20%',
+                    gainPass: '30%',
+                    passOverdue:'46%',
+                    RefuseOverdue: '35%'
+                    },
+                    {
+                    data:'RefuseOverdue',
+                    overallPass: '20%',
+                    gainPass: '30%',
+                    passOverdue:'35%',
+                    RefuseOverdue: '89%'
+                    },
+
+                ],
+                tableDataCutTo:{label:['overallPass','gainPass','passOverdue','RefuseOverdue']}
+                
             }
         },
         updated(){
@@ -418,7 +482,6 @@
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
             }).then((res) => {
-                console.log(res,'385')
                 this.productNames = res.data[0].productName;
                 this.channelIds = res.data[0].channelId;
                 this.scoreNames = res.data[0].scoreName;
@@ -432,7 +495,11 @@
             this.overdueAB();
             this.getProductsData();
             this.overdueNum();
-            this.monthOverdue_series()
+            this.monthOverdue_series();
+            // hyg6.10
+            this.overdueCatchWay();
+            this.overdueExpressionWay()
+            this.cutProportionWay()
             
             //监控bom大小;修改表格宽度
             window.onresize = () => {
@@ -603,7 +670,6 @@
                 // 初始显示状态  数量/比例
                 this.monthOverdue(this.seriesMon)
                 // this.monthOverdue_Ratio(this.seriesMon)
-                // console.log(this.PSIMonth,this.tableDataPSIMonthIn,this.PSIMonthList,this.tableData123,'tabledataPSI')
             },
             resize() {
                 this.myChart.resize();
@@ -612,6 +678,9 @@
                 this.ABOverdue.resize();
                 this.myOverdue.resize();
                 this.overdueMonth.resize()
+                this.overdueCatch.resize();
+                this.overdueExpression.resize();
+                this.cutProportion.resize();
             },
             throttle(method, context) {
                 clearTimeout(method.tId);
@@ -773,8 +842,6 @@
                                         relVal +=
                                             '<br/>' + params[i].seriesName + ' : ' + '0' + "%";
                                     }
-
-
                                 }
                                 return relVal;
                             }
@@ -788,7 +855,6 @@
                                 interval: 'auto',
                                 rotate: 55
                             },
-
                         }],
                         yAxis: {
                             type: 'value',
@@ -1279,7 +1345,6 @@
 
             //getProductsDataA
             getProductsDataA() {
-                // console.log( this.AB.timeSlotA[0].toString() , this.AB.timeSlotA[1].toString(),'getProductsDataA-1')
                 this.$ajax.get('/' + this.scoreName,
                     {
                         url: '/' + this.scoreName,
@@ -1305,6 +1370,7 @@
                         this.overdueAB();
                         this.overdueNum();
                         this.overdue_num();
+                        this.KS_TablePrice(res);
                 }).then(() => {
                     if (this.backgroundColor3 == 0) {
                         this.typeRatioAB(true);
@@ -1332,6 +1398,7 @@
                     }
                 })
                     .then(res => {
+
                         this.ABchartData.B = res.data;
                         this.ischartDatas = true;
                         this.ABPSI =
@@ -1339,6 +1406,7 @@
                         this.overdueAB();
                         this.overdueNum();
                         this.overdue_num();
+                        this.KS_TablePrice(res);
                     })
                     .then(() => {
                         if (this.backgroundColor3 == 0) {
@@ -1347,6 +1415,78 @@
                             this.typeNumberAB(false);
                         }
                     })
+            },
+            // cut值监控
+
+            // ks值表格
+            KS_TablePrice(data){
+                data = data.data.all
+                // score
+                let score = this.xAxis();
+                // Grp_size值
+                let Grp_Size = data.applyCount;
+                // CaptureRate   n/ΣdelinquencyCount array
+                let CaptureRate = this.SUM_OF(data.delinquencyCount);
+                let CaptureRateExp = this.SUM_OF(data.delinquencyCount);
+
+                // Bad pct
+                let BadPct = this.SUM_OF(data.delinquencyRatio);
+                let BadPctExp = this.SUM_OF(data.delinquencyRatio);
+
+                // 重新加载
+                this.tableDataOverdueTo.score=score
+                this.tableDataOverdueTo.Grp_Size=Grp_Size
+                // this.tableDataOverdueTo.CaptureRate = CaptureRate.filter( function (item){
+                //     return item == '0'?null:item
+                // }) 
+                
+                this.tableDataOverdueTo.CaptureRate = [null,null ,'0.3','0.29','0.3','0.4','0.5','0.6','0.7','0.8']
+                this.tableDataOverdueTo.CaptureRateExp=[null,null ,'0.23','0.29','0.35','0.43','0.55','0.62','0.7','0.85']
+
+                // this.tableDataOverdueTo.BadPct=BadPct.filter( function (item){
+                //     return item == '0'?null:item
+                // }) 
+                this.tableDataOverdueTo.BadPct = [null,null ,'0.3','0.29','0.3','0.4','0.5','0.6','0.7','0.8']
+                this.tableDataOverdueTo.BadPctExp=[null,null ,'0.23','0.29','0.35','0.43','0.55','0.62','0.7','0.85']
+
+                this.overdueExpressionWay()
+                this.overdueCatchWay()
+
+                this.tableDataOverdue.forEach((item,index)=>{
+                    switch(item.vertical){
+                        case 'Grp_Size':
+                            score.forEach((itemA,indexA)=>{
+                                item[itemA] = Grp_Size[indexA]
+                            })
+                            break;
+                        case 'Capture Rate':
+                            score.forEach((itemA,indexA)=>{
+                                item[itemA] = CaptureRate[indexA]
+                            })
+                            break;
+                        case 'Capture Rate Exp':
+                            break;
+                        case 'Bad Pct':
+                            score.forEach((itemA,indexA)=>{
+                                item[itemA] = BadPct[indexA]
+                            })
+                            break;
+                        case 'Bad Pct Exp':
+                            break;
+                    }
+                    
+                }) 
+            },
+            // 之和总比单个比列
+            SUM_OF(data){
+                let sum = 0,arrSUM_OF=[]
+                data.forEach((item,index)=>{
+                    sum += item
+                });
+                data.forEach((item,index)=>{
+                    arrSUM_OF.push(item/sum)  
+                });
+                return arrSUM_OF;
             },
 
             //以数值展示图片
@@ -1878,6 +2018,166 @@
                         data: []
                     })
                 })
+            },
+            // 逾期捕捉比例折线图 
+            overdueCatchWay(){
+                let overdueCatch = this.$echarts.init(document.getElementById('overdueCatch'))
+                overdueCatch.clear()
+                let option = {
+                    title: {
+                        text: '逾期捕捉比例'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
+                    },
+                    legend: {
+                        data:['CaptureRate','CaptureRateExp']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: this.xAxis()
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel :{
+                            formatter:x=>Math.round(x*10000)/100+'%'
+                        }
+                    },
+                    series: [
+                        {
+                            name:'CaptureRate',
+                            type:'line',
+                            smooth: false,
+                            data:this.tableDataOverdueTo.CaptureRate
+                        },
+                        {
+                            name:'CaptureRateExp',
+                            type:'line',
+                            smooth: false,
+                            data:this.tableDataOverdueTo.CaptureRateExp
+                        },
+                        
+                    ]
+                };
+                overdueCatch.setOption(option);
+            },
+            // 逾期表现折线图
+            overdueExpressionWay(){
+                let overdueExpression = this.$echarts.init(document.getElementById('overdueExpression'))
+                overdueExpression.clear()
+                let option = {
+                    title: {
+                        text: '逾期表现'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
+                    },
+                    legend: {
+                        data:['BadPct','BadPctExp']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data:  this.xAxis()
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel :{
+                            formatter:x=>Math.round(x*10000)/100+'%'
+                        }
+                    },
+                    series: [
+                        {
+                            name:'BadPct',
+                            type:'line',
+                            smooth: false,
+                            data:this.tableDataOverdueTo.BadPct
+                        },
+                        {
+                            name:'BadPctExp',
+                            type:'line',
+                            smooth: false,
+                            data:this.tableDataOverdueTo.BadPctExp
+                        },
+                        
+                    ]
+                };
+                overdueExpression.setOption(option);
+            },
+            // CUT柱状图
+            cutProportionWay(){
+                let cutProportion = this.$echarts.init(document.getElementById('cutProportion'));
+                cutProportion.clear();
+                let option = {
+                    legend: {},
+                    tooltip: {},
+                    dataset: {
+                        source: [
+                            ['product', '2015', '2016'],
+                            ['Matcha Latte', 43.3, 85.7],
+                            ['Milk Tea', 83.1, 73.4],
+                            ['Cheese Cocoa', 86.4, 65.2],
+                            ['Walnut Brownie', 72.4, 53.9]
+                        ]
+                    },
+                    xAxis: {type: 'category'},
+                    yAxis: {
+                        // axisLabel :{
+                        //     formatter:x=>Math.round(x*10000)/100+'%'
+                        // }
+                    },
+                    series: [
+                        {type: 'bar'},
+                        {type: 'bar'},
+                        // {type: 'bar'}
+                    ],
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                };
+                cutProportion.setOption(option)
             }
         },
     }
@@ -1920,6 +2220,9 @@
     }
     .red{
         color: red;
+    }
+    .marginTop60{
+        margin: 60px 0 0 0;
     }
 
 </style>
