@@ -555,7 +555,6 @@ import { watch } from 'fs';
                         this.flag = true
                         this.PSIMonthSub();
                         this.open()
-                        
                     }, 2000);
                 }
             },
@@ -565,9 +564,9 @@ import { watch } from 'fs';
                 this.seriesMon.forEach((item3)=>{
                     item3.data=[]
                 })
-                // this.seriesMonRatio.forEach((item)=>{
-                //     item.data=[]
-                // })
+                this.seriesMonRatio.forEach((item)=>{
+                    item.data=[]
+                })
                 this.PSIMonth=[];
                 this.tableDataPSIMonthIn=[];
                 this.PSIMonthList=[];
