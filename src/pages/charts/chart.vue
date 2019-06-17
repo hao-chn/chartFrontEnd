@@ -687,8 +687,8 @@ import { watch } from 'fs';
                     this.tableDataPSIMonthIn.push(this.tableData123)
                 })  
                 // 初始显示状态  数量/比例
+                this.monthOverdue_Ratio(this.seriesMonRatio)
                 this.monthOverdue(this.seriesMon)
-                // this.monthOverdue_Ratio(this.seriesMon)
             },
             resize() {
                 this.myChart.resize();
