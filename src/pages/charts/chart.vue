@@ -232,7 +232,7 @@
             <!--chart-->
             <el-button-group>
                 <el-button type="primary" @click="monthOverdue(seriesMon)">数量</el-button>
-                <el-button type="primary" @click="monthOverdue_Ratio(seriesMon)">比例<i class=" el-icon--right"></i></el-button>
+                <el-button type="primary" @click="monthOverdue_Ratio(seriesMonRatio)">比例<i class=" el-icon--right"></i></el-button>
             </el-button-group>
             <div id="overdueMonth" :style="{width:'100%',height:'400px'}" style="margin-top:10px"></div>
         </el-card>
@@ -438,7 +438,9 @@ import { watch } from 'fs';
                         vertical:'Bad Pct Exp',
                     }
                 ],
+                overdueCatch:{},
                 tableDataOverdueTo:[],
+                    overdueExpression:{},
                 tableDataCut: [
                     {
                     data:'800',
@@ -470,11 +472,13 @@ import { watch } from 'fs';
                     },
 
                 ],
+                cutProportion:{},
                 tableDataCutTo:{
                     // label:['overallPass','gainPass','passOverdue','RefuseOverdue']
                     // label:['800','750','700','650']
                     label:['通过整体率','增益通过率','通过逾期率','拒绝逾期率']
-                }
+                },
+                seriesMonRatio:[]
                 
             }
         },
@@ -561,6 +565,9 @@ import { watch } from 'fs';
                 this.seriesMon.forEach((item3)=>{
                     item3.data=[]
                 })
+                // this.seriesMonRatio.forEach((item)=>{
+                //     item.data=[]
+                // })
                 this.PSIMonth=[];
                 this.tableDataPSIMonthIn=[];
                 this.PSIMonthList=[];
@@ -627,6 +634,14 @@ import { watch } from 'fs';
                             dpdCap:this.num
                             }
                         }).then(res => {
+                            // 比例方便计算
+                            console.log(this.seriesMonRatio,index,'638')
+                            let data = this.SUM_OF(res.data.all.approveCount)
+                            data.forEach((item,index)=>{
+                                item = item.toFixed(4)
+                                this.seriesMonRatio[index].data.push(item)
+                            })
+
                             // 数组变换 echart渲染
                             res.data.all.approveCount.forEach((item1,i)=>{
                                 this.seriesMon[i].data.push(item1)
@@ -681,10 +696,10 @@ import { watch } from 'fs';
                 this.ABChart.resize();
                 this.ABOverdue.resize();
                 this.myOverdue.resize();
-                this.overdueMonth.resize()
                 this.overdueCatch.resize();
                 this.overdueExpression.resize();
                 this.cutProportion.resize();
+                this.overdueMonth.resize()
             },
             throttle(method, context) {
                 clearTimeout(method.tId);
@@ -1137,14 +1152,6 @@ import { watch } from 'fs';
 
             //修改日期获取数据
             changeDate() {
-                // function myDate(){
-                //     var myDate = new Date();
-                //         var F=myDate.getFullYear(); //获取完整的年份(4位,1970-????)
-                //         var  M=myDate.getMonth()+1; //获取当前月份(0-11,0代表1月) // 所以获取当前月份是myDate.getMonth()+1;
-                //         var D=myDate.getDate();
-                //         alert(F+"-"+M+"-"+D)
-                // }
-
                 if (this.thisDay) {
                     this.getDatas()
                 }
@@ -1493,10 +1500,16 @@ import { watch } from 'fs';
             SUM_OF(data){
                 let sum = 0,arrSUM_OF=[]
                 data.forEach((item,index)=>{
+                    item = item == NaN? 0: item
                     sum += item
                 });
                 data.forEach((item,index)=>{
-                    arrSUM_OF.push(item/sum)  
+                    item = item == NaN? 0: item
+                    if(sum != 0){
+                        arrSUM_OF.push(item/sum)  
+                    }else{
+                        arrSUM_OF.push(0)
+                    }
                 });
                 return arrSUM_OF;
             },
@@ -1569,8 +1582,6 @@ import { watch } from 'fs';
                                         relVal +=
                                             '<br/>' + params[i].seriesName + ' : ' + '0' + "%";
                                     }
-
-
                                 }
                                 return relVal;
                             }
@@ -1857,16 +1868,13 @@ import { watch } from 'fs';
 
                     xAxis: [{
                         type: 'category',
-                        boundaryGap: false,
                         data: this.xAxis(),
-                        axisLabel: {
-                            interval: 'auto',
-                            rotate: 55
-                        },
                     }],
 
                     yAxis: {
                         type: 'value',
+                        position :'top',
+                        nameLocation:'start'
                     },
                     series:series
                 });
@@ -1923,9 +1931,6 @@ import { watch } from 'fs';
                                 relVal += '<br/>' + params[i].seriesName + ' : ' + params[i].value + "人";
                             }
                             return relVal;
-
-
-                            
                         },
                     },
 
@@ -1954,7 +1959,7 @@ import { watch } from 'fs';
                     series:series
                 })
             },
-            // 放款月份柱状图
+            // 放款月份柱状图 比例
             monthOverdue_Ratio(series){
                 this.overdueMonth = this.$echarts.init(document.getElementById('overdueMonth'),'shine')
                 this.overdueMonth.clear()
@@ -1974,17 +1979,26 @@ import { watch } from 'fs';
                         axisPointer : {        // 坐标轴指示器，坐标轴触发有效
                             type : 'shadow'    // 默认为直线，可选为：'line' | 'shadow'
                         },
-                        formatter: function (params) {
-                            var relVal =  params[0].name;
-                            var num = 0;
-                            for(var i = 0;i < params.length; i++){
-                                num = num + params[i].value
-                            }
-                            for(var j = 0; j < params.length; j++){
-                                relVal += '<br/>' + params[j].seriesName + ' : ' + ((params[j].value/num)*100).toFixed(2) + '%';
-                            }
-                            return relVal;
-                        },
+                        // formatter: function (params) {
+                        //     console.log(params,'1994')
+                        //     var relVal =  params[0].name;
+                        //     var num = 0;
+                        //     for(var i = 0;i < params.length; i++){
+                        //         num = num + params[i].value
+                        //     }
+                        //     for(var j = 0; j < params.length; j++){
+                        //         relVal += '<br/>' + params[j].seriesName + ' : ' + ((params[j].value/num)*100) + '%';
+                        //     }
+                        //     return relVal;
+                        // },
+                        formatter: function (datas) {
+                        var res = datas[0].name + '<br/>'
+                        for (var i = 0, length = datas.length; i < length; i++) {
+                           res += datas[i].marker + " " + datas[i].seriesName + '：' 
+                               + Math.round(datas[i].data*10000)/100+'%' + '<br/>'
+                         }
+                         return res
+                       }
                     },
 
                     legend: {
@@ -1998,20 +2012,17 @@ import { watch } from 'fs';
                     },
 
                     yAxis: [{
-                        type: 'value',
-                        
                     }],
 
                     xAxis: {
                         type: 'category',
                         data:this.PSIMonthList,
-                        // axisLabel: {
-                        //     interval: 'auto',
-                        //     rotate: 55
-                        // },
+                        axisLabel: {
+                            interval: 'auto',
+                            rotate: 55
+                        },
                     },
-
-                    series:series
+                    series:series,
                 })
             },
 
@@ -2029,12 +2040,24 @@ import { watch } from 'fs';
                         },
                         data: []
                     })
+                    this.seriesMonRatio.push({
+                        name: item,
+                        type: 'bar',
+                        stack: '总量',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'insideRight'
+                            }
+                        },
+                        data: []
+                    })
                 })
             },
             // 逾期捕捉比例折线图 
             overdueCatchWay(){
-                let overdueCatch = this.$echarts.init(document.getElementById('overdueCatch'))
-                overdueCatch.clear()
+                this.overdueCatch = this.$echarts.init(document.getElementById('overdueCatch'))
+                this.overdueCatch.clear()
                 let option = {
                     title: {
                         text: '逾期捕捉比例'
@@ -2091,12 +2114,12 @@ import { watch } from 'fs';
                         
                     ]
                 };
-                overdueCatch.setOption(option);
+                this.overdueCatch.setOption(option);
             },
             // 逾期表现折线图
             overdueExpressionWay(){
-                let overdueExpression = this.$echarts.init(document.getElementById('overdueExpression'))
-                overdueExpression.clear()
+                this.overdueExpression = this.$echarts.init(document.getElementById('overdueExpression'))
+                this.overdueExpression.clear()
                 let option = {
                     title: {
                         text: '逾期表现'
@@ -2153,24 +2176,15 @@ import { watch } from 'fs';
                         
                     ]
                 };
-                overdueExpression.setOption(option);
+                this.overdueExpression.setOption(option);
             },
             // CUT柱状图
             cutProportionWay(){
-                let cutProportion = this.$echarts.init(document.getElementById('cutProportion'));
-                cutProportion.clear();
+                this.cutProportion = this.$echarts.init(document.getElementById('cutProportion'));
+                this.cutProportion.clear();
                 let option = {
                     legend: {},
                     tooltip: {
-                    //     trigger: 'axis',
-                    //     formatter: function (datas) {
-                    //     var res = datas[0].name + '<br/>'
-                    //     for (var i = 0, length = datas.length; i < length; i++) {
-                    //        res += datas[i].marker + " " + datas[i].seriesName + '：' 
-                    //            + Math.round(datas[i].data*100)/100+'%' + '<br/>'
-                    //      }
-                    //      return res
-                    //    }
                     },
                     dataset: {
                         source: [
@@ -2199,7 +2213,7 @@ import { watch } from 'fs';
                         containLabel: true
                     },
                 };
-                cutProportion.setOption(option)
+                this.cutProportion.setOption(option)
             }
         },
     }
