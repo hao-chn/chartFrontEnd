@@ -185,16 +185,57 @@
             <div>
                 <el-tag style="margin-bottom: 20px">PSI(AB): {{ABPSI}}</el-tag>
             </div>
+            
+
+
+            <!--chart-->
+            <h4>（定义逾期天数）逾期<el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>天</h4>
+            <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
+
+
+
+            <!--type-->
+            <el-button-group>
+                <el-button type="primary" :class="{active1:backgroundColor6 == 1}" @click="overdue_num">
+                    逾期数量
+                </el-button>
+                <el-button type="primary" :class="{active1:backgroundColor6 == 2}" @click="release_num">
+                    放款数量
+                </el-button>
+            </el-button-group>
+            <!--chart-->
+            <div id="myOverdue" :style="{width:'100%',height:'330px'}"></div>
+        </el-card>
+
+        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+            <!-- 月度变化情况 -->
+            <h3>月度分数变化情况<el-button @click="PSIMonthRefresh" style="margin:0 auto 20px 20px">刷新</el-button></h3>
+            <h3 style="margin:20px auto 0 auto">逾期情况</h3>
+
+            <el-table :data="delinqucyByMonth" stripe style="width: 100%">
+                <el-table-column prop="scorecut" label="分数段" width="180" header-align="center"></el-table-column>
+                <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
+                </el-table-column>
+            </el-table>
+
+            <!--chart-->
+            <h3 style="margin:20px auto 0 auto">分数分布</h3> 
+            <el-button-group>
+                <el-button type="primary" @click="monthOverdue(seriesMon)">数量</el-button>
+                <el-button type="primary" @click="monthOverdue_Ratio(seriesMonRatio)">比例<i class=" el-icon--right"></i></el-button>
+            </el-button-group>
+            <div id="overdueMonth" :style="{width:'100%',height:'400px'}" style="margin-top:10px"></div>
 
             <!-- PSI月度分布表 -->
-            <div id="PSIMonthIn" style="margin:20px auto 0 auto">
-                <h3>PSI月度分布<el-button @click="PSIMonthRefresh" style="margin:0 auto 0 20px">刷新</el-button></h3> 
+            <div id="PSIMonthIn" style="margin:20px auto 20px auto">
+                
+                <h3>PSI分布</h3> 
                 
                 <el-table :data="tableDataPSIMonthIn">
                     <el-table-column prop="vertical" label="">
                     </el-table-column>
 
-                    <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0]">
+                    <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
                         <template slot-scope="scope" >
                             <el-popover trigger="hover" placement="top">
                             <p>{{scope.row[item[0]]}}</p>
@@ -206,35 +247,7 @@
                     </el-table-column>
                 </el-table>
             </div>
-            
-            <!--type-->
-            <el-button-group style="margin: 50px 0px 10px;margin-left: 2%;width: 300px">
-                <!-- <el-button type="primary" :class="{active1:backgroundColor3 == 0}" @click="overdueDay">
-                    逾期比例
-                </el-button> -->
-                <el-button type="primary" :class="{active1:backgroundColor6 == 1}" @click="overdue_num">
-                    逾期数量
-                </el-button>
-                <el-button type="primary" :class="{active1:backgroundColor6 == 2}" @click="release_num">
-                    放款数量
-                </el-button>
-            </el-button-group><br>
-            <!--chart-->
-            <div id="myOverdue" :style="{width:'100%',height:'600px'}"></div>
 
-
-            <!--chart-->
-            逾期&nbsp;
-            <el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 0 20px 0"></el-input-number>
-            &nbsp;天
-            <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
-
-            <!--chart-->
-            <el-button-group>
-                <el-button type="primary" @click="monthOverdue(seriesMon)">数量</el-button>
-                <el-button type="primary" @click="monthOverdue_Ratio(seriesMonRatio)">比例<i class=" el-icon--right"></i></el-button>
-            </el-button-group>
-            <div id="overdueMonth" :style="{width:'100%',height:'400px'}" style="margin-top:10px"></div>
         </el-card>
 
         <!--scoreTable-->
@@ -478,7 +491,8 @@ import { watch } from 'fs';
                     // label:['800','750','700','650']
                     label:['通过整体率','增益通过率','通过逾期率','拒绝逾期率']
                 },
-                seriesMonRatio:[]
+                seriesMonRatio:[],
+                delinqucyByMonth:[{scorecut:'0-100','2018-7-1':0.1}]
                 
             }
         },
@@ -558,6 +572,8 @@ import { watch } from 'fs';
                     }, 2000);
                 }
             },
+            //转换百分数
+            toPercent:s=>Number(s*100).toFixed(1)+'%',
 
             // PSI月度分布
             PSIMonthSub() {
@@ -570,6 +586,7 @@ import { watch } from 'fs';
                 this.PSIMonth=[];
                 this.tableDataPSIMonthIn=[];
                 this.PSIMonthList=[];
+                this.delinqucyByMonth=[];
                 this.tableData123=[];
                 let year = "2018";
                 let month = '7';
@@ -616,6 +633,7 @@ import { watch } from 'fs';
                     }            
                 }
                 localStorage.ki=this.PSIMonth;
+                this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.PSIMonth.forEach((item,index) => {
                     // PSI计算
                     this.$ajax.get('/' + this.scoreName,{
@@ -636,6 +654,8 @@ import { watch } from 'fs';
                             // 比例方便计算
                             console.log(this.seriesMonRatio,index,'638')
                             let data = this.SUM_OF(res.data.all.approveCount)
+                            this.delinqucyByMonth.forEach((v,i)=>{v[item[0]]=this.toPercent(res.data.all.delinquencyRatio[i])});
+                            this.delinqucyByMonth.push();
                             data.forEach((item,index)=>{
                                 item = item.toFixed(4)
                                 this.seriesMonRatio[index].data.push(item)
@@ -655,6 +675,8 @@ import { watch } from 'fs';
                             }
                     })
                 });
+                
+
             },
 
             // KPI月份计算
