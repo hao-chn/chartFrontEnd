@@ -212,7 +212,7 @@
             <h3>月度分数变化情况<el-button @click="PSIMonthRefresh" style="margin:0 auto 20px 20px">刷新</el-button></h3>
             <h3 style="margin:20px auto 0 auto">逾期情况</h3>
 
-            <el-table :data="delinqucyByMonth" stripe style="width: 100%">
+            <el-table :data="delinqucyByMonth" stripe style="width: 100%;white-space: pre-line!important">
                 <el-table-column prop="scorecut" label="分数段" width="180" header-align="center"></el-table-column>
                 <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
                 </el-table-column>
@@ -654,7 +654,7 @@ import { watch } from 'fs';
                             // 比例方便计算
                             console.log(this.seriesMonRatio,index,'638')
                             let data = this.SUM_OF(res.data.all.approveCount)
-                            this.delinqucyByMonth.forEach((v,i)=>{v[item[0]]=this.toPercent(res.data.all.delinquencyRatio[i])});
+                            this.delinqucyByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.delinquencyRatio[i]!=null?`${this.toPercent(res.data.all.delinquencyRatio[i])}\n(${res.data.all.delinquencyCount[i]}/${res.data.all.approveCount[i]})`:'-'});
                             this.delinqucyByMonth.push();
                             data.forEach((item,index)=>{
                                 item = item.toFixed(4)
@@ -2240,7 +2240,15 @@ import { watch } from 'fs';
     }
 </script>
 
+<style>
+    .el-table .cell{
+      white-space: pre-line!important;
+    }
+</style>
+
+
 <style scoped>
+    
     table{
         overflow:auto; 
     }
@@ -2248,6 +2256,7 @@ import { watch } from 'fs';
         /* border:0; */
         padding: 10px;
     }
+    
     #home {
         margin: 10px;
         padding: 10px;
@@ -2281,5 +2290,4 @@ import { watch } from 'fs';
     .marginTop60{
         margin: 60px 0 0 0;
     }
-
 </style>
