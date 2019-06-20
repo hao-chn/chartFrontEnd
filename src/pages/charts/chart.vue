@@ -190,6 +190,7 @@
 
             <!--chart-->
             <h4>（定义逾期天数）逾期<el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>天</h4>
+            <h4> (定义分期期数标记）分期标的<el-input-number v-model="termMonth" :min='0' :max='24'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>期</h4>
             <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
 
 
@@ -434,6 +435,7 @@ import { watch } from 'fs';
                 flag:true,
                 ABOverdue:{},
                 num:10,
+                termMonth:1,
                 myOverdue:{},
                 overdueMonth:{},
                 monthList:[],
@@ -555,6 +557,18 @@ import { watch } from 'fs';
                     }, 1000);
                 }
             },
+            handleTermChange(value){
+                this.termMonth = value
+                if(this.flag){
+                    this.flag =false
+                    setTimeout(() => {
+                        this.getProductsDataA()
+                        this.getProductsDataB()
+                        this.PSIMonthSub()
+                        this.flag = true
+                    }, 1000);
+                }
+            },
             open() {
                 this.$message({
                     message: '刷新成功',
@@ -648,7 +662,8 @@ import { watch } from 'fs';
                             isNew: this.isNew,
                             scoreName: this.scoreName,
                             sectionIpt: this.sectionIpt,
-                            dpdCap:this.num
+                            dpdCap:this.num,
+                            termMonth:this.termMonth
                             }
                         }).then(res => {
                             // 比例方便计算
@@ -1390,7 +1405,8 @@ import { watch } from 'fs';
                             isNew: this.isNew,
                             scoreName: this.scoreName,
                             sectionIpt: this.sectionIpt,
-                            dpdCap:this.num
+                            dpdCap:this.num,
+                            termMonth:this.termMonth
                         }
                     }).then(res => {
                         // console.log(res,'getProductsDataA')
@@ -1426,7 +1442,8 @@ import { watch } from 'fs';
                         isNew: this.isNew,
                         scoreName: this.scoreName,
                         sectionIpt: this.sectionIpt,
-                        dpdCap:this.num
+                        dpdCap:this.num,
+                        termMonth:this.termMonth
                     }
                 })
                     .then(res => {
