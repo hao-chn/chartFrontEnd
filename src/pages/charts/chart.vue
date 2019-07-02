@@ -1,6 +1,6 @@
 <template>
     <div id="home">
-        <el-card class="box-card" id="chart" style="margin-top: 60px;margin-bottom: 30px">
+        <el-card class="box-card" id="chart" style="margin-bottom: 30px">
             <div class="block" style="margin-bottom: 5px">
                 <!--<el-select id="scoreNameSelect" v-model="scoreNames[backgroundColor1]" placeholder="请选择">-->
                 <!--<el-option-->
@@ -210,10 +210,26 @@
 
         <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
             <!-- 月度变化情况 -->
-            <h3>月度分数变化情况<el-button @click="PSIMonthRefresh" style="margin:0 auto 20px 20px">刷新</el-button></h3>
+            <h3>月度分数变化情况<el-button @click="PSIMonthRefresh" style="margin:0 auto 20px 20px">{{refreshShow}}</el-button></h3>
             <h3 style="margin:20px auto 0 auto">逾期情况</h3>
 
             <el-table :data="delinqucyByMonth" stripe style="width: 100%;white-space: pre-line!important">
+                <el-table-column prop="scorecut" label="分数段" width="180" header-align="center"></el-table-column>
+                <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
+                </el-table-column>
+            </el-table>
+
+            <h3 style="margin:20px auto 0 auto">申请用户分布情况</h3>
+
+            <el-table :data="applyRatioByMonth" stripe style="width: 100%;white-space: pre-line!important">
+                <el-table-column prop="scorecut" label="分数段" width="180" header-align="center"></el-table-column>
+                <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
+                </el-table-column>
+            </el-table>
+
+            <h3 style="margin:20px auto 0 auto">分数/特征分离度(KS)</h3>
+
+            <el-table :data="ksByMonth" stripe style="width: 100%;white-space: pre-line!important">
                 <el-table-column prop="scorecut" label="分数段" width="180" header-align="center"></el-table-column>
                 <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
                 </el-table-column>
@@ -494,8 +510,10 @@ import { watch } from 'fs';
                     label:['通过整体率','增益通过率','通过逾期率','拒绝逾期率']
                 },
                 seriesMonRatio:[],
-                delinqucyByMonth:[{scorecut:'0-100','2018-7-1':0.1}]
-                
+                delinqucyByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
+                applyRatioByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
+                ksByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
+                refreshShow:'刷新'
             }
         },
         updated(){
@@ -579,12 +597,24 @@ import { watch } from 'fs';
                 // PSI月度分布点击按钮防抖
                 if(this.flag){
                     this.flag =false
-                    setTimeout(() => {
-                        this.flag = true
-                        this.PSIMonthSub();
-                        this.open()
-                    }, 2000);
+                    this.clockRefresh(3);
+                    this.PSIMonthSub();
+                    this.open()
                 }
+            },
+            //倒计时
+            clockRefresh(time) {
+                this.refreshShow = time + '秒后可重新刷新';
+                let interval = setInterval(() => {
+                    if (time <= 0) {
+                        this.refreshShow = '刷新';
+                        this.flag = true;
+                        clearInterval(interval);
+                    } else {
+                        time--;
+                        this.refreshShow = time + '秒后可重新刷新';
+                    }
+                }, 1000);
             },
             //转换百分数
             toPercent:s=>Number(s*100).toFixed(1)+'%',
@@ -601,6 +631,8 @@ import { watch } from 'fs';
                 this.tableDataPSIMonthIn=[];
                 this.PSIMonthList=[];
                 this.delinqucyByMonth=[];
+                this.applyRatioByMonth=[];
+                this.ksByMonth=[];
                 this.tableData123=[];
                 let year = "2018";
                 let month = '7';
@@ -648,6 +680,8 @@ import { watch } from 'fs';
                 }
                 localStorage.ki=this.PSIMonth;
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
+                this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
+                this.ksByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.PSIMonth.forEach((item,index) => {
                     // PSI计算
                     this.$ajax.get('/' + this.scoreName,{
@@ -671,6 +705,14 @@ import { watch } from 'fs';
                             let data = this.SUM_OF(res.data.all.approveCount)
                             this.delinqucyByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.delinquencyRatio[i]!=null?`${this.toPercent(res.data.all.delinquencyRatio[i])}\n(${res.data.all.delinquencyCount[i]}/${res.data.all.approveCount[i]})`:'-'});
                             this.delinqucyByMonth.push();
+                            this.applyRatioByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.ratioData[i]!='NaN'&&res.data.all.ratioData[i]!=0?`${res.data.all.ratioData[i]}%`:'-'});
+                            this.applyRatioByMonth.push();
+
+                            this.ksByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.delinquencyCount[i]?`${this.toPercent(
+                                this.arrayCumRatio(this.arrayCumsum(res.data.all.delinquencyCount))[i]-
+                                this.arrayCumRatio(this.arrayCumsum(this.minusArrays(res.data.all.approveCount,res.data.all.delinquencyCount)))[i]
+                                )}`:'-'});
+                            this.ksByMonth.push();
                             data.forEach((item,index)=>{
                                 item = item.toFixed(4)
                                 this.seriesMonRatio[index].data.push(item)
@@ -1550,6 +1592,39 @@ import { watch } from 'fs';
                     }
                 });
                 return arrSUM_OF;
+            },
+            //数组cumsum
+            arrayCumsum(arr){
+                let arr1 = new Array(arr.length).fill(0);
+                for(let i=0;i<arr.length;i++){
+                    if(i==0){
+                        arr1[i] = arr[i]
+                    }else{
+                        arr1[i] = arr1[i-1] + arr[i]
+                    }
+                }
+                return arr1
+            },
+            //数组占比
+            arrayRatio(arr){
+                let arr1 = new Array(arr.length).fill(0);
+                let sumall = arr.reduce((x,y)=>x+y);
+                for(let i=0;i<arr.length;i++){
+                    arr1[i] = arr[i]/sumall
+                }
+                return arr1
+            },
+            //数组占比
+            arrayCumRatio(arr){
+                let arr1 = new Array(arr.length).fill(0);
+                for(let i=0;i<arr.length;i++){
+                    arr1[i] = arr[i]/arr.slice(-1,)
+                }
+                return arr1
+            },
+            //数组减法
+            minusArrays(arr1, arr2){
+                return arr1.map((val, index)=>val-arr2[index]);
             },
 
             //以数值展示图片

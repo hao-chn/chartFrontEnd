@@ -1,7 +1,7 @@
 
 <template>
     <div id="chart_ART">
-        <el-card class="box-card" id="chart" style="margin-top: 60px;margin-bottom: 30px">
+        <el-card class="box-card" id="chart" style="margin-bottom: 30px">
             <!--date-->
             <div style="display: inline-block">
                 <el-date-picker v-model="thisDay" type="datetime" placeholder="选择日期时间" align="right"
