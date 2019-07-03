@@ -125,6 +125,11 @@
         }
     }
 </script>
+<style>
+    .el-header{
+        height:0!important;
+    }
+</style>
 
 <style scoped>
 
