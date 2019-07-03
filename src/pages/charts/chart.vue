@@ -255,9 +255,9 @@
                     <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
                         <template slot-scope="scope" >
                             <el-popover trigger="hover" placement="top">
-                            <p>{{scope.row[item[0]]}}</p>
+                            <p>{{scope.row[item[0].replace(/-\d*$/g,'')]}}</p>
                             <div slot="reference" class="name-wrapper">
-                                <el-tag size="medium" class="scopeRow" :class="scope.row[item[0]]>=0.2?'red':''" >{{scope.row[item[0]]}}</el-tag>
+                                <el-tag size="medium" class="scopeRow" :class="scope.row[item[0].replace(/-\d*$/g,'')]>=0.2?'red':''" >{{scope.row[item[0].replace(/-\d*$/g,'')]}}</el-tag>
                             </div>
                             </el-popover>
                         </template>
@@ -598,6 +598,7 @@ import { watch } from 'fs';
                 if(this.flag){
                     this.flag =false
                     this.clockRefresh(3);
+                    this.monthOverdue_series();
                     this.PSIMonthSub();
                     this.open()
                 }
@@ -621,12 +622,15 @@ import { watch } from 'fs';
 
             // PSI月度分布
             PSIMonthSub() {
+                // this.seriesMon =[]
+                // this.seriesMonRatio =[]
                 this.seriesMon.forEach((item3)=>{
                     item3.data=[]
                 })
                 this.seriesMonRatio.forEach((item)=>{
                     item.data=[]
                 })
+                this.monthOverdue_series()
                 this.PSIMonth=[];
                 this.tableDataPSIMonthIn=[];
                 this.PSIMonthList=[];
@@ -701,7 +705,6 @@ import { watch } from 'fs';
                             }
                         }).then(res => {
                             // 比例方便计算
-                            console.log(this.seriesMonRatio,index,'638')
                             let data = this.SUM_OF(res.data.all.approveCount)
                             this.delinqucyByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.delinquencyRatio[i]!=null?`${this.toPercent(res.data.all.delinquencyRatio[i])}\n(${res.data.all.delinquencyCount[i]}/${res.data.all.approveCount[i]})`:'-'});
                             this.delinqucyByMonth.push();
@@ -713,20 +716,21 @@ import { watch } from 'fs';
                                 this.arrayCumRatio(this.arrayCumsum(this.minusArrays(res.data.all.approveCount,res.data.all.delinquencyCount)))[i]
                                 )}`:'-'});
                             this.ksByMonth.push();
-                            data.forEach((item,index)=>{
+                            data.forEach((item,index1)=>{
                                 item = item.toFixed(4)
-                                this.seriesMonRatio[index].data.push(item)
+                                this.seriesMonRatio[index1].data.push(item)
                             })
 
                             // 数组变换 echart渲染
                             res.data.all.approveCount.forEach((item1,i)=>{
-                                this.seriesMon[i].data.push(item1)
+                                this.seriesMon[i].data[index] = item1
                             })
                             item.push(res.data.all.ratioData) 
                             // bug
                             if(this.PSIMonth.length <  index+2){
                                 setTimeout(()=>{
                                     this.APSI()
+                                    
                                     this.tabledataPSI()
                                 },1000)
                             }
@@ -751,19 +755,20 @@ import { watch } from 'fs';
                 this.PSIMonthList= [];
                 this.tableDataPSIMonthIn=[]
                 this.PSIMonth.forEach((item,index) => {
-                    this.PSIMonthList.push(item[0])
+                    this.PSIMonthList.push(item[0].replace(/-\d*$/g,''))
 
                 })
                 this.PSIMonth.forEach((item,index) => {
                     this.tableData123="";
                     this.tableData123 = {
-                        vertical:item[0],
+                        vertical:item[0].replace(/-\d*$/g,''),
                     }
                     this.PSIMonthList.forEach((item1,index1) =>{
                         this.tableData123[item1] = item[index1+3]
                     })
                     this.tableDataPSIMonthIn.push(this.tableData123)
-                })  
+                })
+                
                 // 初始显示状态  数量/比例
                 this.monthOverdue_Ratio(this.seriesMonRatio)
                 this.monthOverdue(this.seriesMon)
@@ -1241,6 +1246,7 @@ import { watch } from 'fs';
                     if (this.thisDay) {
                         this.getDatas()
                     }
+                    
                     this.getProductsData()
                 } else {
                     this.$alert('数值不能为负或者超过最大值', '提示', {
@@ -2047,7 +2053,8 @@ import { watch } from 'fs';
                         },
                     },
 
-                    legend: {
+                    legend: {   
+                        padding: 0
                     },
 
                     grid: {
@@ -2140,6 +2147,8 @@ import { watch } from 'fs';
             },
 
             monthOverdue_series(){
+                this.seriesMon = []
+                this.seriesMonRatio = []
                 this.xAxis().forEach((item,index)=>{
                     this.seriesMon.push({
                         name: item,
