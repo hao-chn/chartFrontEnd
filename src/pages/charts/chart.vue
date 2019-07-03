@@ -92,6 +92,9 @@
                 </el-input>
             </div>
 
+            <h4 style="display: inline-block;width: 280px;margin: 5px 10px 5px">（定义逾期天数）逾期<el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>天</h4>
+            <h4 style="display: inline-block;width: 280px;margin: 5px 10px 5px">(定义分期期数标记）分期标的<el-input-number v-model="termMonth" :min='0' :max='24'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>期</h4>
+
             <!--isometric-->
             <el-button-group v-show="!isometry"
                 style="color: #a8a8a8;display: inline-block;width: 280px;margin: 5px 10px 5px">
@@ -147,68 +150,9 @@
         </el-card>
 
 
-        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
-            <div style="display: flex;justify-content: space-around">
-                <div id="SizerA">
-                    <el-date-picker
-                        v-model="AB.timeSlotA"
-                        type="datetimerange"
-                        format="yyyy 年 MM 月 dd 日"
-                        value-format="yyyy-MM-dd"
-                        :picker-options="pickerOptions"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        @change="getProductsDataA"
-                        align="right">
-                    </el-date-picker>
-                </div>
-                <div id="SizerB">
-                    <el-date-picker
-                        v-model="AB.timeSlotB"
-                        type="datetimerange"
-                        format="yyyy 年 MM 月 dd 日"
-                        value-format="yyyy-MM-dd"
-                        :picker-options="pickerOptions"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        @change="getProductsDataB"
-                        align="right">
-                    </el-date-picker>
-                </div>
-            </div>
-
-            <!--chart-->
-            <div id="ABChart" :style="{width:'100%',height:'400px'}"></div>
-            <!--PSI-->
-            <div>
-                <el-tag style="margin-bottom: 20px">PSI(AB): {{ABPSI}}</el-tag>
-            </div>
-            
 
 
-            <!--chart-->
-            <h4>（定义逾期天数）逾期<el-input-number v-model="num" :min='0' :max='31'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>天</h4>
-            <h4> (定义分期期数标记）分期标的<el-input-number v-model="termMonth" :min='0' :max='24'  size="mini"  @change="handleChange" style="margin:10px 10px 20px 10px"></el-input-number>期</h4>
-            <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
-
-
-
-            <!--type-->
-            <el-button-group>
-                <el-button type="primary" :class="{active1:backgroundColor6 == 1}" @click="overdue_num">
-                    逾期数量
-                </el-button>
-                <el-button type="primary" :class="{active1:backgroundColor6 == 2}" @click="release_num">
-                    放款数量
-                </el-button>
-            </el-button-group>
-            <!--chart-->
-            <div id="myOverdue" :style="{width:'100%',height:'330px'}"></div>
-        </el-card>
-
-        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+        <el-card class="box-card" id="monthChartsData" style="margin-bottom: 30px">
             <!-- 月度变化情况 -->
             <h3>月度分数变化情况<el-button @click="PSIMonthRefresh" style="margin:0 auto 20px 20px">{{refreshShow}}</el-button></h3>
             <h3 style="margin:20px auto 0 auto">逾期情况</h3>
@@ -266,7 +210,63 @@
             </div>
 
         </el-card>
+        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+            <h3>AB组对照比较（月份数据细分）</h3>
+            <div style="display: flex;justify-content: space-around">
+                <div id="SizerA">
+                    <el-date-picker
+                        v-model="AB.timeSlotA"
+                        type="datetimerange"
+                        format="yyyy 年 MM 月 dd 日"
+                        value-format="yyyy-MM-dd"
+                        :picker-options="pickerOptions"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        @change="getProductsDataA"
+                        align="right">
+                    </el-date-picker>
+                </div>
+                <div id="SizerB">
+                    <el-date-picker
+                        v-model="AB.timeSlotB"
+                        type="datetimerange"
+                        format="yyyy 年 MM 月 dd 日"
+                        value-format="yyyy-MM-dd"
+                        :picker-options="pickerOptions"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        @change="getProductsDataB"
+                        align="right">
+                    </el-date-picker>
+                </div>
+            </div>
 
+            <!--chart-->
+            <div id="ABChart" :style="{width:'100%',height:'400px'}"></div>
+            <!--PSI-->
+            <div>
+                <el-tag style="margin-bottom: 20px">PSI(AB): {{ABPSI}}</el-tag>
+            </div>
+            
+
+
+            <!--chart-->
+            
+            <div id="ABOverdue" :style="{width:'100%',height:'400px'}"></div>
+            <!--type-->
+            <el-button-group>
+                <el-button type="primary" :class="{active1:backgroundColor6 == 1}" @click="overdue_num">
+                    逾期数量
+                </el-button>
+                <el-button type="primary" :class="{active1:backgroundColor6 == 2}" @click="release_num">
+                    放款数量
+                </el-button>
+            </el-button-group>
+            <!--chart-->
+            <div id="myOverdue" :style="{width:'100%',height:'330px'}"></div>
+        </el-card>
         <!--scoreTable-->
         <el-card class="box-card" id="table01" style="text-align: left;margin-bottom: 20px;text-align: center;">
             <el-row>
@@ -301,7 +301,7 @@
             </el-row>
         </el-card>
         <!-- 模型KS值 -->
-        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px;display: none">
             <h4 style="margin:20px 0">KS值</h4>
             <el-table
                 :data="tableDataOverdue"
@@ -332,7 +332,7 @@
             <!-- 逾期表现折线图 -->
             <div id="overdueExpression" class="marginTop60" :style="{width:'100%',height:'400px'}"></div>
         </el-card>
-        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px">
+        <el-card class="box-card" id="chartAB" style="margin-bottom: 30px;display: none">
             <h4 style="margin:20px 0">CUT值监控</h4>
             <el-table
                 :data="tableDataCut"
@@ -2345,6 +2345,9 @@ import { watch } from 'fs';
 <style>
     .el-table .cell{
       white-space: pre-line!important;
+    }
+    .el-header{
+        height:60px!important;
     }
 </style>
 
