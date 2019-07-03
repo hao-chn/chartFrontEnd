@@ -682,6 +682,7 @@ import { watch } from 'fs';
                         timelock = false;
                     }            
                 }
+                console.log(this.PSIMonth,'this.PSIMonth生成年月日数据')
                 localStorage.ki=this.PSIMonth;
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
