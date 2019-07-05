@@ -67,6 +67,20 @@
                     </el-form-item>
                 </el-form>
             </div>
+            <div>
+                <el-date-picker
+                    v-model="valueTimeStart0"
+                    type="month"
+                    placeholder="选择起始月">
+                </el-date-picker>
+                至
+                <el-date-picker
+                    v-model="valueTimeStart1"
+                    type="month"
+                    placeholder="选择终止月">
+                </el-date-picker>
+            </div>
+            
 
             <!--subSection-->
             <div class="demo-input-suffix"
@@ -513,11 +527,21 @@ import { watch } from 'fs';
                 delinqucyByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
                 applyRatioByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
                 ksByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
-                refreshShow:'刷新'
+                refreshShow:'刷新',
+                valueTimeStart0:'',
+                valueTimeStart1:''
             }
         },
         updated(){
 
+        },
+        watch:{
+            valueTimeStart0:(newVal,oldVal)=>{
+                console.log(newVal,oldVal,'540')
+            },
+            valueTimeStart1:(newVal,oldVal)=>{
+                console.log(newVal,oldVal,'544')
+            },
         },
         mounted() {
             this.$ajax.get('/home', {
@@ -638,6 +662,7 @@ import { watch } from 'fs';
                 this.applyRatioByMonth=[];
                 this.ksByMonth=[];
                 this.tableData123=[];
+                console.log(this.PSIMonth,'this.PSIMonth生成年月日数据后')
                 let year = "2018";
                 let month = '7';
                 var timelock = true;
@@ -682,7 +707,7 @@ import { watch } from 'fs';
                         timelock = false;
                     }            
                 }
-                console.log(this.PSIMonth,'this.PSIMonth生成年月日数据')
+                console.log(this.PSIMonth,'this.PSIMonth生成年月日数据后')
                 localStorage.ki=this.PSIMonth;
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
