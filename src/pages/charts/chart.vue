@@ -179,6 +179,23 @@
                 </el-table-column>
             </el-table>
 
+
+            <h3 style="margin:20px auto 0 auto">用户分组情况(分为数量相等的10组-从上到下依次为bad_rate、KS、max_score)</h3>
+
+            <el-table :data="foldByMonth" stripe style="width: 100%;white-space: pre-line!important">
+                <el-table-column prop="scorecut" label="Fold（从大到小）" width="180" header-align="center"></el-table-column>
+                <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
+                </el-table-column>
+            </el-table>
+
+            <h3 style="margin:20px auto 0 auto">Score/Feature Efficiency</h3>
+
+            <el-table :data="efficiencyByMonth" stripe style="width: 100%;white-space: pre-line!important">
+                <el-table-column prop="scorecut" label="Top 5%-20% Efficiency" width="180" header-align="center"></el-table-column>
+                <el-table-column v-for="(item,index0) in PSIMonth" :key="index0" :prop="item[0]" :label= "item[0].replace(/-\d*$/g,'')" header-align="center">
+                </el-table-column>
+            </el-table>
+
             <!--chart-->
             <h3 style="margin:20px auto 0 auto">分数分布</h3> 
             <el-button-group>
@@ -513,6 +530,8 @@ import { watch } from 'fs';
                 delinqucyByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
                 applyRatioByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
                 ksByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
+                foldByMonth:[{scorecut:1,'2018-7-1':0.1}],
+                efficiencyByMonth:[{scorecut:1,'2018-7-1':0.1}],
                 refreshShow:'刷新'
             }
         },
@@ -520,6 +539,7 @@ import { watch } from 'fs';
 
         },
         mounted() {
+            document.getElementById('chart-header').style.height="60px";
             this.$ajax.get('/home', {
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
@@ -637,6 +657,8 @@ import { watch } from 'fs';
                 this.delinqucyByMonth=[];
                 this.applyRatioByMonth=[];
                 this.ksByMonth=[];
+                this.foldByMonth=[];
+                this.efficiencyByMonth=[];
                 this.tableData123=[];
                 let year = "2018";
                 let month = '7';
@@ -686,6 +708,8 @@ import { watch } from 'fs';
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.ksByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
+                this.foldByMonth=new Array(10).fill(0).map((v,i)=>{return {'scorecut':i+1}});
+                this.efficiencyByMonth=[{scorecut:'5%'},{scorecut:'10%'},{scorecut:'15%'},{scorecut:'20%'}];
                 this.PSIMonth.forEach((item,index) => {
                     // PSI计算
                     this.$ajax.get('/' + this.scoreName,{
@@ -716,6 +740,14 @@ import { watch } from 'fs';
                                 this.arrayCumRatio(this.arrayCumsum(this.minusArrays(res.data.all.approveCount,res.data.all.delinquencyCount)))[i]
                                 )}`:'-'});
                             this.ksByMonth.push();
+
+                            this.foldByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.percentile[i]?`bad:${this.toPercent(res.data.all.badrate[i])}\nks:${this.toPercent(res.data.all.ks[i])}\nmax:${res.data.all.percentile[i]}
+                                `:'-'});
+                            this.foldByMonth.push();
+
+                            this.efficiencyByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.scoreEffciency[i]?`bad_capture:\n${this.toPercent(res.data.all.scoreEffciency[i])}\ncut_effect:\n${this.toPercent(res.data.all.cutEffect[i])}`:'-'});
+                            this.efficiencyByMonth.push();
+
                             data.forEach((item,index1)=>{
                                 item = item.toFixed(4)
                                 this.seriesMonRatio[index1].data.push(item)
@@ -2344,9 +2376,6 @@ import { watch } from 'fs';
 <style>
     .el-table .cell{
       white-space: pre-line!important;
-    }
-    .el-header{
-        height:60px!important;
     }
 </style>
 

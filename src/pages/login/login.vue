@@ -59,6 +59,7 @@
 
         mounted() {
             this.getFocus(0);
+            document.getElementById('chart-header').style.height="0";
         },
         methods: {
             login() {
@@ -125,11 +126,6 @@
         }
     }
 </script>
-<style>
-    .el-header{
-        height:0!important;
-    }
-</style>
 
 <style scoped>
 

@@ -64,6 +64,7 @@
             }
         },
         mounted() {
+            document.getElementById('chart-header').style.height="60px";
             for (var i = 0; i < this.btnSet.length; i++) {
                 this.postData[this.btnSet[i].name] = this.btnSet[i].btnNames[this.btnSet[i].defaultName];
             }
@@ -80,9 +81,6 @@
 <style>
     .el-table .cell{
       white-space: pre-line!important;
-    }
-    .el-header{
-        height:60px!important;
     }
 </style>
 <style scoped>
