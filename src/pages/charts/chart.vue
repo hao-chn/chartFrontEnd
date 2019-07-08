@@ -531,6 +531,8 @@ import { watch } from 'fs';
                 delinqucyByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
                 applyRatioByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
                 ksByMonth:[{scorecut:'0-100','2018-7-1':0.1}],
+                efficiencyByMonth:[{scorecut:1,'2018-7-1':0.1}],
+                foldByMonth:[{scorecut:1,'2018-7-1':0.1}],
                 refreshShow:'刷新',
                 valueTimeStart0:'',
                 valueTimeStart1:''
