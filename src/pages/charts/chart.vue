@@ -769,52 +769,10 @@ import { watch } from 'fs';
                 this.foldByMonth=[];
                 this.efficiencyByMonth=[];
                 this.tableData123=[];
-                this.PSIMonthTimeGenerate()
-                // 20190708改保留一版
-                // let year = "2018";
-                // let month = '7';
-                // var timelock = true;
-                // let k=0;
-                // // let PSIMonth = [];
-                // function mGetDate(year, month){
-                //     var d = new Date(year, month, 0);
-                //     return d.getDate();
-                // }
-                // var atTimeYear = (new Date()).getFullYear()
-                // var atTimemonth = (new Date()).getMonth()
-                // while(timelock == true){
-                //     if(year < atTimeYear){
-                //         var day = mGetDate(year,month)
-                //         var data = year + "-" + month + "-" + 1
-                //         var data1 = year + "-" + month + "-" + day
-                //             this.PSIMonth.push([])
-                //             this.PSIMonth[k] = [data,data1]
-                //             k++;
-                //         month = parseInt(month) + 1;
-                //         if(month > 12){
-                //             year = parseInt(year) +1;
-                //             month = 1;
-                //         }
-                //     }else if(year == atTimeYear){
-                //         if(month <= atTimemonth){
-                //                 var day = mGetDate(year,month)
-                //                 var data = year + "-" + month + "-" + 1
-                //                 var data1 = year + "-" + month + "-" + day
-                //                     this.PSIMonth.push([])
-                //                     this.PSIMonth[k] = [data,data1]
-                //                     k++;
-                //                 month = parseInt(month) + 1;
-                //                 if(month > 12){
-                //                     year = parseInt(year) +1;
-                //                     month = 1;
-                //                 }
-                //             }else{
-                //             timelock = false;
-                //         }
-                //     }else{
-                //         timelock = false;
-                //     }            
-                // }
+                this.PSIMonthTimeGenerate();
+
+                
+                
                 localStorage.ki=this.PSIMonth;
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
@@ -851,36 +809,29 @@ import { watch } from 'fs';
                                 this.arrayCumRatio(this.arrayCumsum(this.minusArrays(res.data.all.approveCount,res.data.all.delinquencyCount)))[i]
                                 )}`:'-'});
                             this.ksByMonth.push();
-                            data.forEach((item,i)=>{
 
-                            this.foldByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.percentile[i]?`bad:${this.toPercent(res.data.all.badrate[i])}\nks:${this.toPercent(res.data.all.ks[i])}\nmax:${res.data.all.percentile[i]}
+                            this.foldByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.percentile&&res.data.all.percentile[i]?`bad:${this.toPercent(res.data.all.badrate[i])}\nks:${this.toPercent(res.data.all.ks[i])}\nmax:${res.data.all.percentile[i]}
                                 `:'-'});
                             this.foldByMonth.push();
 
-                            this.efficiencyByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.scoreEffciency[i]?`bad_capture:\n${this.toPercent(res.data.all.scoreEffciency[i])}\ncut_effect:\n${this.toPercent(res.data.all.cutEffect[i])}`:'-'});
+                            this.efficiencyByMonth.forEach((v,i)=>{v[item[0]]=res.data.all.scoreEffciency&&res.data.all.scoreEffciency[i]?`bad_capture:\n${this.toPercent(res.data.all.scoreEffciency[i])}\ncut_effect:\n${this.toPercent(res.data.all.cutEffect[i])}`:'-'});
                             this.efficiencyByMonth.push();
 
-                            data.forEach((item,index1)=>{
-                                item = item.toFixed(4)
-                                this.seriesMonRatio[i].data[index] = item;
-                             })
+                            data.forEach((v,i)=>{this.seriesMonRatio[i].data[index] = v.toFixed(4)});
 
                             // 数组变换 echart渲染
-                            res.data.all.approveCount.forEach((item1,i)=>{
-                                this.seriesMon[i].data[index] = item1
-                            })
-                            item.push(res.data.all.ratioData) 
+                            res.data.all.applyCount.forEach((v,i)=>{this.seriesMon[i].data[index] = v});
+                            item.push(res.data.all.ratioData);
+                            console.log(this.PSIMonth);
                             // bug
                             if(this.PSIMonth.length <  index+2){
                                 setTimeout(()=>{
                                     this.APSI()
-                                    
                                     this.tabledataPSI()
-                                },1000)
+                                },3000)
                             }
                     })
                 });
-                
 
             },
             // PSI生成月份表
@@ -937,7 +888,7 @@ import { watch } from 'fs';
                         }
                     }else{
                         timelock = false;
-                    }            
+                    }
                 }
             },
             // KPI月份计算
