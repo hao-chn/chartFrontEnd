@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <el-container>
-            <el-header>
+            <el-header id="chart-header">
                 <el-menu :default-active.stop="activeIndex" class="el-menu-demo" mode="horizontal"
                     @select="handleSelect" v-if="pathArr.indexOf(pathName)==-1"
                     background-color="#545c64" text-color="#fff" active-text-color="#40cc90"

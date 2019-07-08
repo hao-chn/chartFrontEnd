@@ -44,6 +44,7 @@
             },
         },
         mounted() {
+            document.getElementById('chart-header').style.height="60px";
             if (this.jsonName) {
                 this.getData(this.jsonName);
             } else {
@@ -113,9 +114,6 @@
 <style>
     .el-table .cell{
       white-space: pre-line!important;
-    }
-    .el-header{
-        height:60px!important;
     }
 </style>
 <style scoped>
