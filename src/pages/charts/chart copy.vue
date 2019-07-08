@@ -591,6 +591,7 @@ import { watch } from 'fs';
                 }
                 let Y = data.getFullYear()
                 let M = data.getMonth()+1
+                console.log(data, Y,M,'595')
                 if(Y<'2018'){
                     switch(time){
                         case 0:
@@ -603,7 +604,7 @@ import { watch } from 'fs';
                     alert('请选择正确时间，起始时间>=2018-07')
                     return;
                 }else{
-                    if(Y == '2018' && M<'7'){
+                    if(Y == '2018' && M<='7'){
                         switch(time){
                             case 0:
                                 this.valueTimeStart0 = '2018-07'
@@ -641,22 +642,17 @@ import { watch } from 'fs';
                         alert('请选择正确时间，终止时间<=当前时间')
                     }
                 }
+                console.log(this.valueTimeStart0 , this.valueTimeStart1,'653')
                 if(this.valueTimeStart0 && this.valueTimeStart1){
                     let Y0 = this.valueTimeStart0.getFullYear()
-                    let M0 = this.valueTimeStart0.getMonth() +1
+                    let M0 = this.valueTimeStart0.getMonth()
                     let Y1 = this.valueTimeStart1.getFullYear()
-                    let M1 = this.valueTimeStart1.getMonth() +1
-                    if(Y0<=Y1){
-                        if(Y1==Y0 ){
-                            if(M0>M1){
-                                this.valueTimeStart0 ='';
-                                this.valueTimeStart1 ='';
-                                alert('请选择正确范围时间，起止时间<=终止时间.')
-                            }
+                    let M1 = this.valueTimeStart1.getMonth()
+                    if(Y1<=Y0){
+                        if(!(Y1==Y0 && M0<=M1)){
+                            alert('请选择正确范围时间，起止时间<=终止时间')
                         }
                     }else{
-                        this.valueTimeStart0 ='';
-                        this.valueTimeStart1 ='';
                         alert('请选择正确范围时间，起止时间<=终止时间')
                     }
                 }
@@ -747,52 +743,52 @@ import { watch } from 'fs';
                 this.applyRatioByMonth=[];
                 this.ksByMonth=[];
                 this.tableData123=[];
-                this.PSIMonthTimeGenerate()
-                // 20190708改保留一版
-                // let year = "2018";
-                // let month = '7';
-                // var timelock = true;
-                // let k=0;
-                // // let PSIMonth = [];
-                // function mGetDate(year, month){
-                //     var d = new Date(year, month, 0);
-                //     return d.getDate();
-                // }
-                // var atTimeYear = (new Date()).getFullYear()
-                // var atTimemonth = (new Date()).getMonth()
-                // while(timelock == true){
-                //     if(year < atTimeYear){
-                //         var day = mGetDate(year,month)
-                //         var data = year + "-" + month + "-" + 1
-                //         var data1 = year + "-" + month + "-" + day
-                //             this.PSIMonth.push([])
-                //             this.PSIMonth[k] = [data,data1]
-                //             k++;
-                //         month = parseInt(month) + 1;
-                //         if(month > 12){
-                //             year = parseInt(year) +1;
-                //             month = 1;
-                //         }
-                //     }else if(year == atTimeYear){
-                //         if(month <= atTimemonth){
-                //                 var day = mGetDate(year,month)
-                //                 var data = year + "-" + month + "-" + 1
-                //                 var data1 = year + "-" + month + "-" + day
-                //                     this.PSIMonth.push([])
-                //                     this.PSIMonth[k] = [data,data1]
-                //                     k++;
-                //                 month = parseInt(month) + 1;
-                //                 if(month > 12){
-                //                     year = parseInt(year) +1;
-                //                     month = 1;
-                //                 }
-                //             }else{
-                //             timelock = false;
-                //         }
-                //     }else{
-                //         timelock = false;
-                //     }            
-                // }
+                console.log(this.PSIMonth,'this.PSIMonth生成年月日数据后')
+                let year = "2018";
+                let month = '7';
+                var timelock = true;
+                let k=0;
+                // let PSIMonth = [];
+                function mGetDate(year, month){
+                    var d = new Date(year, month, 0);
+                    return d.getDate();
+                }
+                var atTimeYear = (new Date()).getFullYear()
+                var atTimemonth = (new Date()).getMonth()
+                while(timelock == true){
+                    if(year < atTimeYear){
+                        var day = mGetDate(year,month)
+                        var data = year + "-" + month + "-" + 1
+                        var data1 = year + "-" + month + "-" + day
+                            this.PSIMonth.push([])
+                            this.PSIMonth[k] = [data,data1]
+                            k++;
+                        month = parseInt(month) + 1;
+                        if(month > 12){
+                            year = parseInt(year) +1;
+                            month = 1;
+                        }
+                    }else if(year == atTimeYear){
+                        if(month <= atTimemonth){
+                                var day = mGetDate(year,month)
+                                var data = year + "-" + month + "-" + 1
+                                var data1 = year + "-" + month + "-" + day
+                                    this.PSIMonth.push([])
+                                    this.PSIMonth[k] = [data,data1]
+                                    k++;
+                                month = parseInt(month) + 1;
+                                if(month > 12){
+                                    year = parseInt(year) +1;
+                                    month = 1;
+                                }
+                            }else{
+                            timelock = false;
+                        }
+                    }else{
+                        timelock = false;
+                    }            
+                }
+                console.log(this.PSIMonth,'this.PSIMonth生成年月日数据后')
                 localStorage.ki=this.PSIMonth;
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
@@ -850,63 +846,7 @@ import { watch } from 'fs';
                 
 
             },
-            // PSI生成月份表
-            PSIMonthTimeGenerate(){
-                let Y0 = '';let M0  = '';let Y1 = '';let M1 = ''
-                if(this.valueTimeStart0 ){
-                    Y0 = this.valueTimeStart0.getFullYear() 
-                    M0 = this.valueTimeStart0.getMonth() + 1
-                     
-                }
-                if(this.valueTimeStart1){
-                    Y1 = this.valueTimeStart1.getFullYear() 
-                    M1 = this.valueTimeStart1.getMonth() +1 
-                }
-                let year =Y0 || "2018";
-                let month =M0 || '7';
-                var timelock = true;
-                let k=0;
-                // let PSIMonth = [];
-                function mGetDate(year, month){
-                    var d = new Date(year, month, 0);
-                    return d.getDate();
-                }
-                var atTimeYear = Y1 ||(new Date()).getFullYear()
-                var atTimemonth =M1 || (new Date()).getMonth() +1
-                while(timelock == true){
-                    if(year < atTimeYear){
-                        var day = mGetDate(year,month)
-                        var data = year + "-" + month + "-" + 1
-                        var data1 = year + "-" + month + "-" + day
-                            this.PSIMonth.push([])
-                            this.PSIMonth[k] = [data,data1]
-                            k++;
-                        month = parseInt(month) + 1;
-                        if(month > 12){
-                            year = parseInt(year) +1;
-                            month = 1;
-                        }
-                    }else if(year == atTimeYear){
-                        if(month <= atTimemonth){
-                                var day = mGetDate(year,month)
-                                var data = year + "-" + month + "-" + 1
-                                var data1 = year + "-" + month + "-" + day
-                                    this.PSIMonth.push([])
-                                    this.PSIMonth[k] = [data,data1]
-                                    k++;
-                                month = parseInt(month) + 1;
-                                if(month > 12){
-                                    year = parseInt(year) +1;
-                                    month = 1;
-                                }
-                            }else{
-                            timelock = false;
-                        }
-                    }else{
-                        timelock = false;
-                    }            
-                }
-            },
+
             // KPI月份计算
             APSI() {
                 this.PSIMonth.forEach((item,index) => {
