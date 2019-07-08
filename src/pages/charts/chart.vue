@@ -772,7 +772,6 @@ import { watch } from 'fs';
                 this.PSIMonthTimeGenerate();
 
                 
-                
                 localStorage.ki=this.PSIMonth;
                 this.delinqucyByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.applyRatioByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
@@ -822,7 +821,6 @@ import { watch } from 'fs';
                             // 数组变换 echart渲染
                             res.data.all.applyCount.forEach((v,i)=>{this.seriesMon[i].data[index] = v});
                             item.push(res.data.all.ratioData);
-                            console.log(this.PSIMonth);
                             // bug
                             if(this.PSIMonth.length <  index+2){
                                 setTimeout(()=>{
