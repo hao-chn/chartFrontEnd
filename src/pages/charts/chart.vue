@@ -829,10 +829,10 @@ import { watch } from 'fs';
                                 this.arrayCumRatio(this.arrayCumsum(this.minusArrays(res.data.all.approveCount,res.data.all.delinquencyCount)))[i]
                                 )}`:'-'});
                             this.ksByMonth.push();
-                            data.forEach((item,index1)=>{
+                            data.forEach((item,i)=>{
                                 item = item.toFixed(4)
-                                this.seriesMonRatio[index1].data.push(item)
-                            })
+                                this.seriesMonRatio[i].data[index] = item;
+                             })
 
                             // 数组变换 echart渲染
                             res.data.all.approveCount.forEach((item1,i)=>{
