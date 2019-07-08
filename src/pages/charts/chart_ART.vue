@@ -570,6 +570,7 @@
         },
 
         mounted() {
+            document.getElementById('chart-header').style.height="60px";
             this.$ajax.get('/home', {
                 url: '/home',
                 baseURL: process.env.API_BASEURL,
@@ -1105,9 +1106,6 @@
 <style>
     .el-table .cell{
       white-space: pre-line!important;
-    }
-    .el-header{
-        height:60px!important;
     }
 </style>
 <style scoped>

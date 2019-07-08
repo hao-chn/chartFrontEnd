@@ -132,9 +132,6 @@
     .el-table .cell{
       white-space: pre-line!important;
     }
-    .el-header{
-        height:60px!important;
-    }
 </style>
 <style scoped>
     .ebdList {
