@@ -778,7 +778,10 @@ import { watch } from 'fs';
                 this.ksByMonth=this.xAxis().map(x=>{return {'scorecut':x}});
                 this.foldByMonth=new Array(10).fill(0).map((v,i)=>{return {'scorecut':i+1}});
                 this.efficiencyByMonth=[{scorecut:'5%'},{scorecut:'10%'},{scorecut:'15%'},{scorecut:'20%'}];
+                // 判断是否请求完成
+                let Inum = 0
                 this.PSIMonth.forEach((item,index) => {
+                    Inum++;
                     // PSI计算
                     this.$ajax.get('/' + this.scoreName,{
                         url: '/' + this.scoreName,
@@ -822,15 +825,14 @@ import { watch } from 'fs';
                             res.data.all.applyCount.forEach((v,i)=>{this.seriesMon[i].data[index] = v});
                             item.push(res.data.all.ratioData);
                             // bug
-                            if(this.PSIMonth.length <  index+2){
-                                setTimeout(()=>{
-                                    this.APSI()
-                                    this.tabledataPSI()
-                                },3000)
+                            Inum--;
+                            if(Inum == 0){
+                                console.log(Inum,'830')
+                                this.APSI()
+                                this.tabledataPSI()
                             }
                     })
                 });
-
             },
             // PSI生成月份表
             PSIMonthTimeGenerate(){
@@ -891,9 +893,12 @@ import { watch } from 'fs';
             },
             // KPI月份计算
             APSI() {
+                console.log(this.PSIMonth,'899')
                 this.PSIMonth.forEach((item,index) => {
                     for(var j = 0; j < this.PSIMonth.length; j++){
-                        item.push(this.assessPSI(item[2],this.PSIMonth[j][2]))
+                        if(item[2] && this.PSIMonth[j][2]){
+                            item.push(this.assessPSI(item[2],this.PSIMonth[j][2]))
+                        }
                     }
                     this.$forceUpdate()
                 })
