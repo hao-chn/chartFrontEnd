@@ -827,7 +827,6 @@ import { watch } from 'fs';
                             // bug
                             Inum--;
                             if(Inum == 0){
-                                console.log(Inum,'830')
                                 this.APSI()
                                 this.tabledataPSI()
                             }
@@ -893,7 +892,6 @@ import { watch } from 'fs';
             },
             // KPI月份计算
             APSI() {
-                console.log(this.PSIMonth,'899')
                 this.PSIMonth.forEach((item,index) => {
                     for(var j = 0; j < this.PSIMonth.length; j++){
                         if(item[2] && this.PSIMonth[j][2]){
